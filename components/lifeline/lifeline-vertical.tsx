@@ -17,6 +17,7 @@ import {
   getLifelineEventImage,
   getLifelineEventKey,
   LifelineEventText,
+  LifelineMarkerSquare,
 } from "./lifeline-event"
 import { useLifelineFireworks } from "./lifeline-fireworks"
 import {
@@ -30,8 +31,8 @@ import { getMarkerHeight, hasMarkerContent } from "./lifeline-utils"
 import { useLifelineIntro } from "./use-lifeline-intro"
 import { useLifelineVerticalScroll } from "./use-lifeline-vertical-scroll"
 
-const GRID_CLASS = "grid grid-cols-[2.5rem_1rem_1fr] gap-x-3"
-const RAIL_LEFT = "calc(2.5rem + 0.75rem + 0.5rem)"
+const GRID_CLASS = "grid grid-cols-[1rem_1fr] gap-x-3"
+const RAIL_LEFT = "0.5rem"
 
 /**
  * Above this many entries the delay-armed intro fades would promote
@@ -155,7 +156,6 @@ const LifelineVerticalEntry = forwardRef<
   HTMLLIElement,
   {
     marker: LifelineMarker
-    birthYear: number
     animateIntro?: boolean
     introDelay?: number
     introDuration?: number
@@ -164,7 +164,6 @@ const LifelineVerticalEntry = forwardRef<
 >(function LifelineVerticalEntry(
   {
     marker,
-    birthYear,
     animateIntro = false,
     introDelay = 0,
     introDuration = 420,
@@ -172,7 +171,6 @@ const LifelineVerticalEntry = forwardRef<
   },
   ref,
 ) {
-  const age = marker.age ?? marker.year - birthYear
   const people = aggregateLifelinePeople(marker)
   const photos = marker.photos ?? []
   const hasContent = hasMarkerContent(marker) || photos.length > 0
@@ -212,10 +210,6 @@ const LifelineVerticalEntry = forwardRef<
         }}
       >
         <div className={`${GRID_CLASS} items-center`}>
-          <p className="text-right text-[11px] font-medium leading-4 tabular-nums text-zinc-500 transition-colors duration-300 dark:text-zinc-600">
-            {age}
-          </p>
-
           <div className="flex items-center justify-center">
             <RailTick />
           </div>
@@ -227,7 +221,6 @@ const LifelineVerticalEntry = forwardRef<
 
         {hasContent && (
           <div className={`${GRID_CLASS} mt-6`}>
-            <div aria-hidden="true" />
             <div aria-hidden="true" />
             <div className="min-w-0 text-zinc-500 transition-colors duration-300 dark:text-zinc-400">
               {marker.badges && marker.badges.length > 0 && (
@@ -268,6 +261,10 @@ const LifelineVerticalEntry = forwardRef<
                 </div>
               )}
 
+              {marker.media && (
+                <LifelineMarkerSquare media={marker.media} className="mt-6" />
+              )}
+
               {photos.length > 0 && (
                 <div className="mt-6 flex flex-wrap items-start">
                   {photos.map((photo, index) => (
@@ -299,11 +296,25 @@ const LifelineVerticalEntry = forwardRef<
 })
 
 export function LifelineVertical({
-  markers,
-  birthYear,
+  markers: allMarkers,
   title = "Lifeline",
   mode = "auto",
 }: LifelineProps) {
+  /**
+   * Quiet years earn their place on the horizontal rail — they are what
+   * makes an 18-year gap *look* like eighteen years. Stacked vertically
+   * they are just empty rows between the milestones, so a phone pays for
+   * them in scroll distance and gets nothing back.
+   */
+  const markers = useMemo(
+    () =>
+      allMarkers.filter(
+        (marker) =>
+          hasMarkerContent(marker) || (marker.photos?.length ?? 0) > 0,
+      ),
+    [allMarkers],
+  )
+
   // Only an explicit `mode` embeds the vertical layout. `"auto"` measures
   // scrollability on desktop, but the mobile layout *is* a vertical
   // scroller inside a scrolling stage, so that test would read every
@@ -317,7 +328,10 @@ export function LifelineVertical({
     [markers],
   )
 
-  const intro = useLifelineIntro(heights)
+  // No intro on the vertical layout. It is the mobile layout, and the
+  // intro drives a page-length auto-scroll — landing a first-time
+  // visitor at the far end of the timeline instead of the top.
+  const intro = useLifelineIntro(heights, false)
   const isIntroAnimating = intro.shouldPlay && intro.isPlaying
 
   // Warm the event media posters during idle — the tap-to-open
@@ -432,15 +446,12 @@ export function LifelineVertical({
       ref={sectionRef}
       aria-label={title}
       className={cn(
-        "relative select-none px-6 pb-10 pt-4 [&_a]:cursor-pointer",
+        "relative select-none pb-10 pl-4 pt-4 [&_a]:cursor-pointer",
         !isLayoutReady && "invisible",
       )}
       style={showIntro ? introStyle : undefined}
     >
       <div className={cn(`${GRID_CLASS} mb-6 items-end`, showIntro && "lifeline-labels-intro")}>
-        <p className="text-right text-[11px] font-medium uppercase leading-4 tracking-[0.08em] text-zinc-500 transition-colors duration-300 dark:text-zinc-600">
-          Age
-        </p>
         <div aria-hidden="true" />
         <p className="text-[11px] font-medium uppercase leading-5 tracking-[0.08em] text-zinc-500 transition-colors duration-300 dark:text-zinc-600">
           Years
@@ -467,7 +478,6 @@ export function LifelineVertical({
               key={marker.id}
               ref={(node) => setEntryRef(index, node)}
               marker={marker}
-              birthYear={birthYear}
               animateIntro={animateEntries}
               revealPending={showIntro && revealOnScroll}
               introDelay={intro.getMarkerDelay(index)}

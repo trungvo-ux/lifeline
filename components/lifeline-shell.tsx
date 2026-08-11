@@ -27,7 +27,7 @@ export function LifelineShell({
   return (
     <div
       className={cn(
-        "flex h-dvh flex-col overflow-hidden bg-white text-black antialiased transition-colors duration-300 dark:bg-black dark:text-white",
+        "flex min-h-dvh flex-col bg-white text-black antialiased transition-colors duration-300 dark:bg-black dark:text-white",
         className,
       )}
     >
@@ -83,8 +83,9 @@ export function LifelineNav({
 }
 
 /**
- * The stage. `pt-16` clears the fixed nav; `md:overflow-hidden` hands
- * scrolling to the horizontal scrub above the mobile breakpoint.
+ * The stage. `pt-16` clears the fixed nav; `.lifeline-fixed-stage`
+ * (globals.css) hands scrolling to the horizontal scrub, but only on a
+ * viewport with room for it.
  */
 export function LifelineStage({
   children,
@@ -96,7 +97,11 @@ export function LifelineStage({
   return (
     <main
       className={cn(
-        "flex-1 min-h-0 overflow-y-auto pt-16 md:overflow-hidden",
+        // Mobile lets the page itself scroll — the vertical timeline is a
+        // long list, and boxing it into a viewport-height scroller left it
+        // a couple hundred pixels tall. Desktop keeps the fixed stage the
+        // horizontal scrub needs.
+        "lifeline-fixed-stage pt-16",
         className,
       )}
     >

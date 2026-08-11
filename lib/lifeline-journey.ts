@@ -31,12 +31,10 @@ function fullLabel(day: number) {
 const milestones: LifelineMilestones = {
   1: {
     id: "departure",
-    age: "",
     events: ["It began, as these things do, with a one-way ticket."],
   },
   6: {
     id: "first-stop",
-    age: "W1",
     events: [
       "First stop. Nothing went to plan, which was the plan.",
       // Badges are small images above a day's events — flags, crests:
@@ -45,7 +43,6 @@ const milestones: LifelineMilestones = {
   },
   14: {
     id: "the-turn",
-    age: "W2",
     events: [
       {
         text: "The day everything turned.",
@@ -55,12 +52,10 @@ const milestones: LifelineMilestones = {
   },
   23: {
     id: "the-low",
-    age: "W3",
     events: ["The low point. Every journey has one; this was ours."],
   },
   31: {
     id: "the-comeback",
-    age: "W4",
     events: [
       "The comeback, against every expectation including our own.",
       // photos: [{ src: "/moments/comeback.jpg", alt: "That night" }],
@@ -68,7 +63,6 @@ const milestones: LifelineMilestones = {
   },
   39: {
     id: "the-end",
-    age: "F",
     events: [{ text: "The last day. 🎆", effect: "fireworks" }],
   },
 }
@@ -87,8 +81,7 @@ export const journeyLifeline = {
   markers: record.markers.map((marker) => ({
     ...marker,
     // Days with events get the full "Jun 6" label; quiet days just
-    // the day number — and no age unless a stage label is set.
+    // the day number.
     label: marker.events.length > 0 ? fullLabel(marker.year) : dayLabel(marker.year),
-    age: marker.age ?? "",
   })),
 }

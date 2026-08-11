@@ -147,6 +147,7 @@ export function LifelinePhotoCard({
       <div
         ref={cardRef}
         data-lifeline-interactive=""
+        data-click-sound="photo-card"
         className={cn(
           // pan-y keeps page scrolling alive on touch: a vertical swipe
           // starting on a card scrolls the timeline (the browser claims

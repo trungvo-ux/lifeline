@@ -107,14 +107,16 @@ export function useLifelineVerticalScroll(
   }, [markerCount])
 
   useLayoutEffect(() => {
-    const max = measureLayout()
+    measureLayout()
 
     const scrollParent = scrollParentRef.current
     if (!scrollParent) return
 
     if (!initialized.current) {
-      scrollParent.scrollTop =
-        introSkippedRef.current && !isEmbedRef.current ? max : 0
+      // Skipping the intro used to jump straight to the settled end
+      // state — which on the vertical layout means opening a phone at
+      // the bottom of a page-length timeline. Open at the top instead.
+      scrollParent.scrollTop = 0
       initialized.current = true
     }
 

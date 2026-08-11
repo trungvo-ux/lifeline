@@ -19,6 +19,11 @@ const OPEN_MS = 520
 const EASE = "cubic-bezier(0.32, 0.72, 0, 1)"
 /** Fraction of the viewport the expanded media may occupy. */
 const FIT = 0.85
+const RETRO_FRAME_PADDING = 12
+const RETRO_FRAME_BOTTOM = 48
+const RETRO_SHADOW_Y = 14
+const RETRO_SHADOW_BLUR = 28
+const RETRO_SHADOW_SPREAD = -18
 
 interface Target {
   left: number
@@ -127,6 +132,7 @@ export function LifelineLightbox({
   rotate,
   start,
   getHome,
+  framed = false,
   onClosed,
 }: {
   photo: LifelinePhoto
@@ -136,11 +142,26 @@ export function LifelineLightbox({
   start: LifelineLightboxStart
   /** Re-measures the card at dismiss time. */
   getHome: () => LifelineLightboxStart | null
+  /** Preserve the white retro-print treatment in the expanded view. */
+  framed?: boolean
   onClosed: () => void
 }) {
   const target = useRef<Target | null>(null)
   if (target.current === null) target.current = computeTarget(start)
   const { left, top, width, height } = target.current
+  // The clone itself is full-size and FLIP-scales down over the source.
+  // Scale its paper margins up by the inverse amount so their *visible*
+  // size at the first/last frame exactly matches the 12px/48px source
+  // margins. Keeping the proportions constant also prevents the image
+  // well from stretching as the card travels.
+  const frameScale = framed ? width / start.w : 1
+  const framePadding = RETRO_FRAME_PADDING * frameScale
+  const frameBottom = RETRO_FRAME_BOTTOM * frameScale
+  const frameShadow = framed
+    ? `0 ${RETRO_SHADOW_Y * frameScale}px ${
+        RETRO_SHADOW_BLUR * frameScale
+      }px ${RETRO_SHADOW_SPREAD * frameScale}px rgba(28, 25, 23, 0.42)`
+    : undefined
 
   const figureRef = useRef<HTMLElement>(null)
 
@@ -204,6 +225,7 @@ export function LifelineLightbox({
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
+    root.focus({ preventScroll: true })
     const block = (event: TouchEvent) => event.preventDefault()
     root.addEventListener("touchmove", block, { passive: false })
     return () => root.removeEventListener("touchmove", block)
@@ -257,6 +279,7 @@ export function LifelineLightbox({
       role="dialog"
       aria-modal="true"
       aria-label={photo.alt}
+      tabIndex={-1}
       // The portal lives under <body>, but React events still bubble up
       // the component tree — without this, a backdrop press would reach
       // the card's drag handlers and the track's scrubber.
@@ -277,12 +300,22 @@ export function LifelineLightbox({
       />
       <figure
         ref={figureRef}
-        className="absolute cursor-zoom-out overflow-hidden rounded-xl shadow-2xl ring-1 ring-black/10 dark:ring-white/15"
+        className={cn(
+          "absolute cursor-zoom-out overflow-hidden",
+          framed
+            ? "bg-white"
+            : "rounded-xl shadow-2xl ring-1 ring-black/10 dark:ring-white/15",
+        )}
         style={{
           left,
           top,
           width,
           height,
+          paddingTop: framed ? framePadding : undefined,
+          paddingRight: framed ? framePadding : undefined,
+          paddingBottom: framed ? frameBottom : undefined,
+          paddingLeft: framed ? framePadding : undefined,
+          boxShadow: frameShadow,
           transform,
           transformOrigin: "center",
           transition: reduceMotion ? undefined : `transform ${OPEN_MS}ms ${EASE}`,
@@ -297,11 +330,13 @@ export function LifelineLightbox({
           else setSettled(true)
         }}
       >
-        <LightboxMedia
-          photo={photo}
-          playing={settled}
-          mediaTime={start.mediaTime}
-        />
+        <div className={cn(framed && "h-full w-full overflow-hidden")}>
+          <LightboxMedia
+            photo={photo}
+            playing={settled}
+            mediaTime={start.mediaTime}
+          />
+        </div>
       </figure>
     </div>,
     document.body,

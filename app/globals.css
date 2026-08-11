@@ -4,12 +4,110 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root {
+  --duration-quick: 150ms;
+  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --toggle-dur: 350ms;
+  --toggle-travel: 14.66px;
+  --toggle-ov1: 1px;
+  --toggle-ov2: 0px;
+  --toggle-track: 0ms;
+  --toggle-ease: cubic-bezier(0.34, 1.35, 0.64, 1);
+}
+
+.t-toggle { transition: background var(--toggle-track) var(--toggle-ease); }
+.t-toggle-thumb { translate: 0 0; will-change: translate; }
+.t-toggle[data-on="true"] .t-toggle-thumb { translate: var(--toggle-travel) 0; }
+.t-toggle.is-init[data-on="true"] .t-toggle-thumb { animation: t-toggle-on var(--toggle-dur) var(--toggle-ease) both; }
+.t-toggle.is-init[data-on="false"] .t-toggle-thumb { animation: t-toggle-off var(--toggle-dur) var(--toggle-ease) both; }
+.t-toggle-glass {
+  transition-property: transform, box-shadow, background-color;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-smooth-out);
+  transform: scale(1);
+  transform-origin: center;
+  will-change: transform;
+}
+.t-toggle[data-pressed="true"] .t-toggle-glass,
+.t-toggle:active .t-toggle-glass {
+  transform: scale(1.5);
+  background-color: rgb(255 255 255 / 0.65);
+  box-shadow:
+    0 7px 18px rgb(0 0 0 / 0.24),
+    inset 0 1px 1px rgb(255 255 255 / 0.9),
+    0 0 0 1px rgb(255 255 255 / 0.5);
+}
+@keyframes t-toggle-on {
+  0% { translate: 0 0; }
+  55% { translate: calc(var(--toggle-travel) + var(--toggle-ov1)) 0; }
+  80% { translate: calc(var(--toggle-travel) - var(--toggle-ov2)) 0; }
+  100% { translate: var(--toggle-travel) 0; }
+}
+@keyframes t-toggle-off {
+  0% { translate: var(--toggle-travel) 0; }
+  55% { translate: calc(0px - var(--toggle-ov1)) 0; }
+  80% { translate: var(--toggle-ov2) 0; }
+  100% { translate: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-toggle-thumb { animation: none !important; }
+  .t-toggle-glass { transition-duration: 0.01ms; }
+}
+
+@keyframes exploration-switch-label-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.exploration-switch-label {
+  animation: exploration-switch-label-in 220ms cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exploration-switch-label {
+    animation: none;
+  }
+}
+
+/*
+ * The stage fills leftover viewport height so the timeline centres on a
+ * tall screen, but never shrinks below the track — `flex-shrink: 0` with
+ * `flex-basis: auto` is what makes that automatic. Squeeze the window and
+ * the page grows a scrollbar instead of cropping the squares; the
+ * Lifeline's `mode="auto"` sees the scrollable page and switches itself
+ * to embed, handing the wheel back at either end of the rail.
+ *
+ * Do not reintroduce a height media query here. The about block's height
+ * changes with width and copy, so any fixed threshold is a guess that
+ * clips at some viewport — which is exactly what it did.
+ */
+.lifeline-fixed-stage {
+  flex: 1 0 auto;
+  overflow: visible;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  /* Notion's link blue — the hover colour for study links. */
+  --color-notion-blue: var(--notion-blue);
+  /* Case study palette, from the Figma file's variables. */
+  --color-study-blue: var(--study-blue); /* colors/primary-colors */
+  --color-study-surface: var(--study-surface); /* backgrounds/secondary */
+  --color-study-ink: var(--study-ink); /* colors/font-color */
+  --color-study-meta: var(--study-meta); /* colors/gray/800 */
+  --color-study-caption: var(--study-caption); /* colors/gray/900 */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
-  --font-heading: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,6 +147,32 @@
 }
 
 :root {
+  --modal-open-dur: 250ms;
+  --modal-close-dur: 150ms;
+  --modal-scale: 0.96;
+  --modal-scale-close: 0.96;
+  --modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --shake-distance: 6px;
+  --shake-overshoot: 4px;
+  --shake-dur-a: 80ms;
+  --shake-dur-b: 60ms;
+  --shake-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --revert-hold: 3000ms;
+  --revert-dur: 280ms;
+  --tt-in-dur: 150ms;
+  --tt-out-dur: 50ms;
+  --tt-scale: 0.98;
+  --tt-delay: 80ms;
+  --tt-in-ease: ease-out;
+  --tt-out-ease: ease-out;
+  --tt-bg: oklch(1 0 0);
+  --tt-fg: oklch(0.305 0 0);
+  --notion-blue: oklch(0.606 0.167 252.702);
+  --study-blue: oklch(0.579 0.215 258.042);
+  --study-surface: oklch(0.963 0.007 286.274);
+  --study-ink: oklch(0.182 0 0);
+  --study-meta: oklch(0.590 0 0);
+  --study-caption: oklch(0.510 0 0);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -83,7 +207,761 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
+.t-tt-wrap {
+  position: relative;
+  display: inline-block;
+}
+.t-tt {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translate(-50%, 0) scale(var(--tt-scale));
+  transform-origin: 50% 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--tt-bg);
+  color: var(--tt-fg);
+  white-space: nowrap;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.06),
+    0 2px 6px 0 rgba(0, 0, 0, 0.05),
+    0 4px 42px 0 rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--tt-out-dur) var(--tt-out-ease),
+    transform var(--tt-out-dur) var(--tt-out-ease);
+}
+.t-tt-wrap:hover .t-tt,
+.t-tt-trigger:focus-visible + .t-tt {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  transition-duration: var(--tt-in-dur);
+  transition-timing-function: var(--tt-in-ease);
+  transition-delay: var(--tt-delay);
+}
+
+.exploration-nav {
+  position: relative;
+}
+
+.exploration-tooltip {
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  overflow: hidden;
+  text-align: center;
+  transform: translate3d(
+      calc(var(--exploration-tooltip-x, 0px) - 50%),
+      0,
+      0
+    )
+    scale(var(--tt-scale));
+  transition:
+    opacity var(--tt-out-dur) var(--tt-out-ease),
+    transform var(--tt-out-dur) var(--tt-out-ease);
+  will-change: transform, opacity;
+}
+
+.exploration-tooltip[data-open="true"] {
+  opacity: 1;
+  transform: translate3d(
+      calc(var(--exploration-tooltip-x, 0px) - 50%),
+      0,
+      0
+    )
+    scale(1);
+  transition-duration: var(--tt-in-dur);
+  transition-timing-function: var(--tt-in-ease);
+  transition-delay: var(--tt-delay);
+}
+
+.exploration-tooltip[data-open="true"][data-bridging="true"] {
+  transition-duration: 250ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: 0ms;
+}
+
+.exploration-tooltip-copy-slot {
+  position: relative;
+  display: block;
+}
+
+.exploration-tooltip-copy {
+  display: block;
+  will-change: transform, filter, opacity;
+}
+
+.exploration-tooltip-copy.is-previous {
+  position: absolute;
+  inset: 0;
+}
+
+.exploration-tooltip-copy-slot[data-direction="right"]
+  .exploration-tooltip-copy.is-current {
+  animation: exploration-copy-enter-right 180ms
+    cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.exploration-tooltip-copy-slot[data-direction="right"]
+  .exploration-tooltip-copy.is-previous {
+  animation: exploration-copy-exit-left 120ms ease-in-out both;
+}
+
+.exploration-tooltip-copy-slot[data-direction="left"]
+  .exploration-tooltip-copy.is-current {
+  animation: exploration-copy-enter-left 180ms cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+.exploration-tooltip-copy-slot[data-direction="left"]
+  .exploration-tooltip-copy.is-previous {
+  animation: exploration-copy-exit-right 120ms ease-in-out both;
+}
+
+@keyframes exploration-copy-enter-right {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
+@keyframes exploration-copy-enter-left {
+  from {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(-8px, 0, 0);
+  }
+}
+
+@keyframes exploration-copy-exit-left {
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(-8px, 0, 0);
+  }
+}
+
+@keyframes exploration-copy-exit-right {
+  to {
+    opacity: 0;
+    filter: blur(2px);
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-tt {
+    transition: none !important;
+  }
+
+  .exploration-tooltip-copy {
+    animation: none !important;
+  }
+}
+
+/* Availability letter */
+.availability-trigger {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(235, 235, 235, 1) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.1),
+    0 1px 2px -1px rgb(0 0 0 / 0.08),
+    0 2px 4px rgb(0 0 0 / 0.04);
+  transition-property: box-shadow, filter, transform;
+  transition-duration: 240ms;
+  transition-timing-function: ease-in-out;
+}
+
+.availability-trigger::after {
+  position: absolute;
+  inset: -4px 0;
+  content: "";
+}
+
+.availability-trigger:hover {
+  filter: brightness(0.985);
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.13),
+    0 2px 4px -1px rgb(0 0 0 / 0.1),
+    0 5px 12px rgb(0 0 0 / 0.08);
+}
+
+.availability-trigger:focus-visible {
+  box-shadow:
+    0 0 0 2px var(--background),
+    0 0 0 4px rgb(34 197 94 / 0.45);
+}
+
+.availability-trigger:active {
+  transform: scale(0.96);
+}
+
+.availability-dot {
+  transform-origin: center;
+  transition:
+    transform 240ms ease-in-out,
+    opacity 240ms ease-in-out,
+    box-shadow 240ms ease-in-out;
+}
+
+.availability-trigger:hover .availability-dot {
+  transform: scale(1.08);
+  opacity: 0.88;
+  box-shadow: 0 0 0 3px rgb(34 197 94 / 0.1);
+}
+
+.dark .availability-trigger {
+  background: linear-gradient(
+    180deg,
+    oklch(0.300 0 0) 0%,
+    oklch(0.220 0 0) 100%
+  );
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.14),
+    0 1px 2px -1px oklch(0 0 0 / 0.38),
+    0 2px 8px oklch(0 0 0 / 0.24);
+}
+
+.dark .availability-trigger:hover {
+  filter: brightness(1.08);
+  box-shadow:
+    0 0 0 1px oklch(1 0 0 / 0.22),
+    0 2px 4px -1px oklch(0 0 0 / 0.44),
+    0 6px 16px oklch(0 0 0 / 0.3);
+}
+
+.letter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 72px;
+  pointer-events: none;
+}
+
+.letter-overlay.is-open,
+.letter-overlay.is-sending {
+  pointer-events: auto;
+}
+
+.letter-backdrop {
+  position: absolute;
+  inset: 0;
+  cursor: default;
+  background: rgb(12 14 16 / 0.46);
+  opacity: 0;
+  backdrop-filter: blur(3px);
+  transition-property: opacity;
+  transition-duration: var(--modal-open-dur);
+  transition-timing-function: var(--modal-ease);
+}
+
+.letter-overlay.is-open .letter-backdrop {
+  opacity: 1;
+}
+
+.letter-overlay.is-closing .letter-backdrop,
+.letter-overlay.is-sending .letter-backdrop {
+  opacity: 0;
+  transition-duration: var(--modal-close-dur);
+}
+
+.letter-dialog {
+  position: relative;
+  width: min(500px, 58dvh, calc(100dvw - 144px));
+}
+
+.letter-form {
+  position: relative;
+}
+
+.letter-paper {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: 210 / 297;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 48px 48px 30px 72px;
+  color: #25231f;
+  background-color: #fffdf6;
+  background-image:
+    radial-gradient(circle, rgb(70 57 38 / 0.04) 0 0.6px, transparent 0.8px),
+    linear-gradient(
+      90deg,
+      transparent 0,
+      transparent 52px,
+      rgb(208 75 75 / 0.28) 53px,
+      transparent 54px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 31px,
+      rgb(77 126 177 / 0.22) 32px
+    );
+  background-position: 0 0, 0 0, 0 16px;
+  background-size: 7px 7px, auto, auto;
+  clip-path: polygon(
+    0.2% 0.4%,
+    24% 0%,
+    51% 0.25%,
+    77% 0%,
+    99.8% 0.35%,
+    100% 99.7%,
+    72% 100%,
+    45% 99.72%,
+    18% 100%,
+    0% 99.6%
+  );
+  box-shadow:
+    0 0 0 1px rgb(70 57 38 / 0.06),
+    0 18px 45px -18px rgb(31 28 22 / 0.34),
+    0 6px 16px -8px rgb(31 28 22 / 0.18);
+  transform: rotate(-0.18deg);
+  transform-origin: 50% 12%;
+  will-change: transform, opacity, filter;
+}
+
+.letter-paper::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(105deg, transparent 40%, rgb(113 95 68 / 0.035), transparent 63%),
+    radial-gradient(circle at 70% 24%, rgb(255 255 255 / 0.45), transparent 32%);
+  content: "";
+  mix-blend-mode: multiply;
+}
+
+.letter-heading,
+.letter-message,
+.letter-signoff {
+  font-family: var(--font-handwriting), "Segoe Print", cursive;
+  font-synthesis: none;
+}
+
+.letter-heading {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 32px;
+  text-wrap: balance;
+}
+
+.letter-message {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 0;
+  margin-top: 32px;
+  resize: none;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 20px;
+  line-height: 32px;
+}
+
+.letter-message::placeholder {
+  color: rgb(37 35 31 / 0.38);
+}
+
+.letter-signature {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(250px, 100%);
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 8px;
+}
+
+.letter-signoff {
+  font-size: 18px;
+  line-height: 32px;
+  color: rgb(37 35 31 / 0.64);
+}
+
+.letter-email-field {
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-handwriting), "Segoe Print", cursive;
+  font-synthesis: none;
+  font-size: 17px;
+  line-height: 30px;
+  color: #25231f;
+}
+
+.letter-email-field::placeholder {
+  color: rgb(37 35 31 / 0.34);
+}
+
+.letter-email-field:focus {
+  border-bottom-color: rgb(37 35 31 / 0.3);
+}
+
+.letter-email-scribble {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  width: calc(100% - 78px);
+  height: 14px;
+  overflow: visible;
+  fill: none;
+  stroke: #d32727;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.letter-email-scribble path {
+  stroke-dasharray: 230;
+  stroke-dashoffset: 230;
+}
+
+.letter-spam-quip {
+  position: absolute;
+  right: 0;
+  bottom: 32px;
+  left: 0;
+  margin: 0;
+  color: #a62b2b;
+  font-family: var(--font-handwriting), "Segoe Print", cursive;
+  font-synthesis: none;
+  font-size: 13px;
+  line-height: 18px;
+  opacity: 0;
+  filter: blur(2px);
+  pointer-events: none;
+  transform: translate3d(0, 4px, 0);
+  transition:
+    opacity 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    filter 180ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.letter-spam-quip.is-visible {
+  opacity: 0.8;
+  filter: blur(0);
+  transform: translate3d(0, 0, 0);
+}
+
+.letter-signature.is-error .letter-email-scribble path {
+  animation: letter-scribble-in 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.letter-signature.is-error .letter-email-scribble path:nth-child(2) {
+  animation-delay: 55ms;
+}
+
+@keyframes letter-scribble-in {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.letter-send,
+.letter-close {
+  min-width: 44px;
+  min-height: 44px;
+  transition-property: background-color, box-shadow, color, transform, opacity, filter;
+  transition-duration: 160ms;
+  transition-timing-function: ease-out;
+}
+
+.letter-send {
+  position: absolute;
+  right: auto;
+  bottom: -60px;
+  left: 50%;
+  border-radius: 999px;
+  padding: 0 18px;
+  background: #25231f;
+  color: #fffdf6;
+  opacity: 0;
+  filter: blur(4px);
+  pointer-events: none;
+  transform: translate(-50%, 4px) scale(0.96);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.14),
+    0 4px 10px rgb(0 0 0 / 0.1);
+}
+
+.letter-send.is-ready {
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: auto;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.letter-send:hover:not(:disabled) {
+  background: #090908;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.18),
+    0 7px 16px rgb(0 0 0 / 0.14);
+}
+
+.letter-send:focus-visible,
+.letter-close:focus-visible {
+  outline: 2px solid #25231f;
+  outline-offset: 3px;
+}
+
+.letter-send:active:not(:disabled),
+.letter-close:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.letter-send:active:not(:disabled) {
+  transform: translate(-50%, 0) scale(0.96);
+}
+
+.letter-send:disabled {
+  cursor: not-allowed;
+}
+
+.letter-send.is-ready:disabled {
+  opacity: 0.35;
+}
+
+.letter-close {
+  position: absolute;
+  top: 0;
+  right: -56px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.82);
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.letter-close:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+
+@keyframes letter-send-flight {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-0.18deg) scale(1);
+    filter: blur(0);
+  }
+  14% {
+    opacity: 1;
+    transform: translate3d(0, -8%, 0) rotate(-0.2deg) scaleX(0.98)
+      scaleY(1.16);
+    filter: blur(0);
+  }
+  34% {
+    opacity: 1;
+    transform: translate3d(0, -38%, 0) rotate(-0.55deg) scaleX(0.82)
+      scaleY(1.2);
+    filter: blur(0.5px);
+  }
+  64% {
+    opacity: 0.78;
+    transform: translate3d(0, -102%, 0) rotate(-1.25deg) scaleX(0.3)
+      scaleY(0.9);
+    filter: blur(1.5px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -178%, 0) rotate(-1.8deg) scaleX(0.04)
+      scaleY(0.38);
+    filter: blur(4px);
+  }
+}
+
+.letter-paper.is-sending {
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: letter-send-flight 700ms linear forwards;
+}
+
+.letter-form.is-sending .letter-send,
+.letter-dialog:has(.letter-paper.is-sending) > .letter-close {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Border-color tween. Define your input's default / focused
+   / error border-color in your own component CSS — this rule
+   only owns the interpolation. Use a constant border-width
+   across states so the tween never shifts inner content. */
+.t-input {
+  transition: border-color 150ms ease-out;
+  will-change: transform;
+}
+.t-input.is-error {
+  /* Error border auto-reverts on the hold timer, so the
+     fade-out uses the slower revert duration (matches the
+     message fade). */
+  transition: border-color var(--revert-dur, 280ms) ease-out;
+}
+
+/* Error message reveal. Visibility is delayed by --revert-dur
+   on hide so the message stays painted for the full opacity
+   fade-out. Entering .is-error drops the delay to 0 so the
+   message becomes visible immediately. */
+.t-error-msg {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity    var(--revert-dur, 280ms) ease-out,
+    visibility 0s linear var(--revert-dur, 280ms);
+}
+.t-input-wrap.is-error .t-error-msg {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity    var(--revert-dur, 280ms) ease-out,
+    visibility 0s linear 0s;
+}
+
+/* Multi-segment keyframe with per-stop easing so each leg
+   of the shake follows its own cubic-bezier independently.
+   %-stops are cumulative durations as a fraction of the
+   total (80, 60, 80, 60 = 280ms): 28.57%, 57.14%, 78.57%,
+   100%. Recompute if any segment duration changes. */
+.t-input.is-shaking {
+  animation: t-input-shake calc(
+      var(--shake-dur-a) * 2 + var(--shake-dur-b) * 2
+    ) linear;
+}
+@keyframes t-input-shake {
+  0%      { transform: translateX(0);                                 animation-timing-function: var(--shake-ease); }
+  28.57%  { transform: translateX(var(--shake-distance));             animation-timing-function: var(--shake-ease); }
+  57.14%  { transform: translateX(calc(var(--shake-distance) * -1)); animation-timing-function: var(--shake-ease); }
+  78.57%  { transform: translateX(var(--shake-overshoot));            animation-timing-function: var(--shake-ease); }
+  100%    { transform: translateX(0); }
+}
+
+.t-modal {
+  transform-origin: center;
+  transform: scale(var(--modal-scale));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-open-dur) var(--modal-ease),
+    opacity   var(--modal-open-dur) var(--modal-ease);
+  will-change: transform, opacity;
+}
+.t-modal.is-open {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+.t-modal.is-closing {
+  transform: scale(var(--modal-scale-close));
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform var(--modal-close-dur) var(--modal-ease),
+    opacity   var(--modal-close-dur) var(--modal-ease);
+}
+
+@media (max-width: 639px) {
+  .letter-overlay {
+    padding: 64px 12px 76px;
+  }
+
+  .letter-dialog {
+    width: min(calc(100dvw - 24px), 58dvh);
+  }
+
+  .letter-paper {
+    height: auto;
+    min-height: 0;
+    aspect-ratio: 210 / 297;
+    padding: 48px 24px 26px 54px;
+    background-image:
+      radial-gradient(circle, rgb(70 57 38 / 0.04) 0 0.6px, transparent 0.8px),
+      linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 38px,
+        rgb(208 75 75 / 0.28) 39px,
+        transparent 40px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 31px,
+        rgb(77 126 177 / 0.22) 32px
+      );
+    background-position: 0 0, 0 0, 0 16px;
+    background-size: 7px 7px, auto, auto;
+  }
+
+  .letter-heading {
+    font-size: 24px;
+  }
+
+  .letter-message {
+    min-height: 320px;
+    font-size: 18px;
+  }
+
+  .letter-signature {
+    width: 100%;
+  }
+
+  .letter-close {
+    top: -52px;
+    right: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-modal { transition: none !important; }
+
+  .availability-trigger,
+  .letter-backdrop,
+  .letter-send,
+  .letter-close {
+    transition: none !important;
+  }
+
+  .letter-spam-quip {
+    transition: opacity 120ms linear !important;
+    filter: none;
+    transform: none;
+  }
+
+  .letter-paper.is-sending {
+    animation: none;
+    opacity: 0;
+  }
+
+  .t-input { animation: none !important; transform: none !important; }
+}
+
 .dark {
+  color-scheme: dark;
+  --tt-bg: oklch(0.269 0 0);
+  --tt-fg: oklch(0.985 0 0);
+  --notion-blue: oklch(0.740 0.140 252.702);
+  --study-blue: oklch(0.720 0.170 258.042);
+  --study-surface: oklch(0.230 0.007 286.274);
+  --study-ink: oklch(0.940 0 0);
+  --study-meta: oklch(0.720 0 0);
+  --study-caption: oklch(0.720 0 0);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -126,6 +1004,34 @@
   }
   html {
     @apply font-sans;
+    color-scheme: light;
+    /*
+     * No visible scrollbar anywhere. Wheel, trackpad, touch and keyboard
+     * all still scroll — this only hides the indicator.
+     *
+     * It also settles a layout bug on its own: the timeline fits a tall
+     * viewport while a case study never does, so a scrollbar used to
+     * appear on one route and not the other and every centred column,
+     * masthead included, jumped 7px sideways on navigation. With no
+     * scrollbar on either, there is nothing left to shift. `stable` stays
+     * as the belt-and-braces for any browser that ignores the hiding.
+     */
+    scrollbar-gutter: stable;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* legacy Edge */
+  }
+
+  html,
+  body {
+    /* The desktop track is intentionally much wider than the viewport.
+       Its children may escape the timeline vertically, but the document
+       itself must never gain a horizontal scroll range. */
+    overflow-x: clip;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
   }
 }
 /* Lifeline — intro animation plumbing */
@@ -182,4 +1088,196 @@
 
 .lifeline-labels.is-pinned {
   z-index: 20;
+}
+
+/* The masthead enters independently on compact layouts. Desktop keeps the
+   fixed editorial composition completely still. */
+@keyframes mobile-masthead-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .mobile-masthead-fade {
+    animation: mobile-masthead-fade-in 300ms cubic-bezier(0.16, 1, 0.3, 1)
+      backwards;
+  }
+}
+
+/*
+ * Case study reveal — each block slides in from the left and sharpens
+ * into focus, one after the next.
+ *
+ * Pure CSS on purpose: the sequence is predetermined, so it runs off the
+ * main thread and stays smooth while the route's images are still
+ * decoding. The blur is what sells it — it reads as the block resolving
+ * rather than sliding, and 8px stays cheap enough for Safari.
+ *
+ * 60ms apart, inside the 30–80ms band where a stagger reads as cascade
+ * rather than queue. Only the card's children animate; the name above it
+ * is already on screen and stays put, so the page reads as one sheet
+ * settling rather than a route swapping in.
+ */
+@keyframes study-rise {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+.study-reveal > * {
+  animation: study-rise 420ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.study-reveal > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.study-reveal > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.study-reveal > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.study-reveal > *:nth-child(4) {
+  animation-delay: 180ms;
+}
+.study-reveal > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+.study-reveal > *:nth-child(6) {
+  animation-delay: 300ms;
+}
+.study-reveal > *:nth-child(7) {
+  animation-delay: 360ms;
+}
+.study-reveal > *:nth-child(8) {
+  animation-delay: 420ms;
+}
+.study-reveal > *:nth-child(n + 9) {
+  animation-delay: 480ms;
+}
+
+/*
+ * The home page's version: same blur-and-settle, but rising from below.
+ * `.reveal-up` staggers its own children; `.reveal-up-last` is for a
+ * block that has to come after a different parent's run, which is how
+ * the timeline follows the about copy.
+ */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/*
+ * `backwards`, not `forwards`. The timeline stage contains three
+ * position:fixed overlays — the lightbox, the fireworks canvas and the
+ * cursor-following hover image — and a held `transform`/`filter` (even
+ * `blur(0)`) makes their ancestor a containing block, so they would
+ * anchor to the stage instead of the viewport for the life of the page.
+ * `backwards` shows the from-state through the delay and then hands the
+ * element back to its own style, leaving nothing applied.
+ */
+.reveal-up > *,
+.reveal-up-last {
+  animation: reveal-up 420ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+}
+
+.reveal-up > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.reveal-up > *:nth-child(2) {
+  animation-delay: 60ms;
+}
+.reveal-up > *:nth-child(3) {
+  animation-delay: 120ms;
+}
+.reveal-up > *:nth-child(n + 4) {
+  animation-delay: 180ms;
+}
+
+/* Picks up where the about copy leaves off. */
+.reveal-up-last {
+  animation-delay: 180ms;
+}
+
+/* Reduced motion keeps the fade — it explains that content arrived —
+   and drops the travel and the blur, which are the parts that provoke. */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes study-rise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes reveal-up {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .study-reveal > *,
+  .reveal-up > *,
+  .reveal-up-last {
+    animation-duration: 200ms;
+  }
+
+  .mobile-masthead-fade {
+    animation-duration: 1ms;
+  }
+}
+
+/*
+ * The labels column paints nothing. It used to carry a white fill to mask
+ * markers scrubbing underneath "Years", but the left fade zone already
+ * takes them to ~5% opacity by the time they get there, so the fill was
+ * doing almost no work while putting a solid block over the timeline.
+ */
+@keyframes exploration-tile-enter {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+.exploration-grid-tile {
+  opacity: 0;
+  animation: exploration-tile-enter 420ms cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exploration-grid-tile {
+    opacity: 1;
+    animation: none;
+  }
 }

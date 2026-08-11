@@ -54,7 +54,6 @@ export default function EmbedDemo() {
           <Lifeline
             mode="embed"
             markers={evilrabbitLifeline.markers}
-            birthYear={evilrabbitLifeline.birthYear}
             title={`${evilrabbitLifeline.name} — embedded`}
             className="h-full"
           />
@@ -85,7 +84,6 @@ export default function EmbedDemo() {
         <div className="mt-16 h-[520px] w-full overflow-hidden rounded-xl border border-black/10 transition-colors duration-300 dark:border-white/10">
           <Lifeline
             markers={evilrabbitLifeline.markers}
-            birthYear={evilrabbitLifeline.birthYear}
             title={`${evilrabbitLifeline.name} — auto`}
             className="h-full"
           />

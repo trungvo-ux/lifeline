@@ -17,7 +17,6 @@ import { getMarkerWidth } from "./lifeline-utils"
 
 export function LifelineDesktop({
   markers,
-  birthYear,
   className,
   title = "Lifeline",
   mode = "auto",
@@ -53,7 +52,7 @@ export function LifelineDesktop({
     return images
   }, [markers])
 
-  const intro = useLifelineIntro(widths)
+  const intro = useLifelineIntro(widths, true, `desktop:${title}`)
   const isIntroAnimating = intro.shouldPlay && intro.isPlaying
 
   const {
@@ -66,6 +65,7 @@ export function LifelineDesktop({
     introArmed,
   } = useLifelineScroll(markers.length, {
     mode,
+    positionKey: `desktop:${title}`,
     introLocked: isIntroAnimating,
     introAnimating: isIntroAnimating,
     introSkipped: !intro.shouldPlay,
@@ -97,7 +97,7 @@ export function LifelineDesktop({
       // page-mode lifeline is reached just by scrolling to it.
       tabIndex={isEmbed ? 0 : undefined}
       className={cn(
-        "relative h-full min-h-0 select-none overflow-hidden [&_a]:cursor-pointer",
+        "relative h-full min-h-0 select-none overflow-visible [&_a]:cursor-pointer",
         // `pan-y` lets the browser start a vertical page scroll on the
         // first frame instead of waiting on the JS axis lock; horizontal
         // panning stays ours.
@@ -117,27 +117,25 @@ export function LifelineDesktop({
       {/*
         Centered — but `safe center` where the browser understands it, which
         matters once the height is the consumer's to choose. A track taller
-        than its box would otherwise overflow equally top and bottom, and
-        since the section clips, the first thing lost is the row nearest the
-        top: the Age/Years label column and the year labels. `safe` falls
-        back to start-alignment exactly in that case, so the labels and the
-        rail stay put and only the tail of a long column clips. Declared
-        inline so browsers without it simply keep the `items-center` class.
+        than its box would otherwise overflow equally top and bottom. `safe`
+        falls back to start-alignment in that case, keeping the labels and
+        rail in view while the card layer remains free to escape the stage.
+        Declared inline so older browsers simply keep `items-center`.
       */}
       <div
-        className="flex h-full items-center overflow-hidden"
+        className="flex h-full items-center overflow-visible"
         style={isEmbed ? { alignItems: "safe center" } : undefined}
       >
         <div
           ref={trackRef}
-          className="relative flex w-max items-start will-change-transform [--lifeline-people-top:calc(14.5rem+40px)] [--lifeline-rail:5rem]"
+          className="relative flex w-max items-start will-change-transform [--lifeline-people-top:calc(14.5rem+40px)] [--lifeline-rail:2.75rem]"
           style={{ width: trackWidth }}
         >
           {/*
             LIFELINE_STICKY_SHIELD_WIDTH reserves this column at the head of
             the track, and the column has to actually paint it: once the
             track scrolls, marker text passes underneath and would otherwise
-            read straight through "Age" and "Years".
+            read straight through "Years".
 
             `bg-white dark:bg-black` to match the framing the shell puts
             around this — reframe the page on a different surface and this
@@ -149,7 +147,7 @@ export function LifelineDesktop({
           */}
           <div
             ref={labelsRef}
-            className="lifeline-labels shrink-0 bg-white transition-colors duration-300 will-change-transform dark:bg-black"
+            className="lifeline-labels shrink-0 self-stretch will-change-transform"
             style={{ width: LIFELINE_STICKY_SHIELD_WIDTH }}
           >
             <div className={cn(showIntro && "lifeline-labels-intro")}>
@@ -176,7 +174,6 @@ export function LifelineDesktop({
                   key={marker.id}
                   ref={(node) => setMarkerRef(index, node)}
                   marker={marker}
-                  birthYear={birthYear}
                   minWidth={widths[index]}
                   animateIntro={showIntro}
                   introDelay={intro.getMarkerDelay(index)}

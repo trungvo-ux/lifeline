@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Inter, Kalam } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { ClickSound } from "@/components/click-sound";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
+const kalam = Kalam({
+  variable: "--font-handwriting",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
-  title: "Lifeline",
+  title: "Trung Vo's Portfolio",
   description:
-    "A timeline component for the stories that unfold over time — a career, a company, a journey. Ships as a shadcn registry.",
+    "Product designer who ships — a decade of interfaces, told in the order they were built.",
 };
 
 export default function RootLayout({
@@ -22,11 +29,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} h-full font-sans antialiased`}
+      className={`${inter.variable} ${kalam.variable} h-full font-sans antialiased`}
       suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" disableTransitionOnChange>
+          <ClickSound />
           {children}
         </ThemeProvider>
       </body>

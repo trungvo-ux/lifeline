@@ -1,56 +1,21 @@
-import { Lifeline, LifelineLegend } from "@/components/lifeline"
-import {
-  LifelineFooter,
-  LifelineNav,
-  LifelineShell,
-  LifelineStage,
-} from "@/components/lifeline-shell"
-import { DemoCompanyIcons } from "@/components/demo-company-icons"
-import { ThemeSwitcher } from "@/components/theme-switcher"
-import { CopyCommand } from "@/components/copy-command"
-import { RabbitLogo } from "@/components/rabbit-logo"
-import { evilrabbitLifeline } from "@/lib/evilrabbit"
+import { HomeExperience } from "@/components/home-experience"
+import { LifelineShell } from "@/components/lifeline-shell"
+import { SiteHeader } from "@/components/site-header"
 
 export default function Home() {
   return (
     <LifelineShell>
-      {/* The same shell the registry ships as `page` — the nav's
-          capped inner container is what the rail aligns its start and
-          end to. */}
-      <LifelineNav
-        logo={<RabbitLogo className="h-6 w-6" />}
-        logoLabel="Evil Rabbit — Lifeline"
-      >
-        {/* The /embed demo is unlisted for now — the route still works,
-            it just isn't linked from here yet. */}
-        <a
-          href="https://github.com/evilrabbit/lifeline"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm text-zinc-500 transition-colors duration-300 hover:text-black dark:hover:text-white"
-        >
-          GitHub
-        </a>
-      </LifelineNav>
+      {/* About, in place of the old nav. It carries no `data-site-nav-*`
+          hooks, so the rail below stops following the chrome and fills its
+          own container edge to edge instead.
 
-      <DemoCompanyIcons />
-
-      <LifelineStage>
-        <Lifeline
-          markers={evilrabbitLifeline.markers}
-          birthYear={evilrabbitLifeline.birthYear}
-          title={evilrabbitLifeline.name}
-          className="h-full"
-        />
-      </LifelineStage>
-
-      <LifelineFooter>
-        <div className="flex items-center gap-6">
-          <ThemeSwitcher />
-          <LifelineLegend />
-        </div>
-        <CopyCommand command="npx shadcn add evilrabbit/lifeline/personal" />
-      </LifelineFooter>
+          The name sticks to the top on phone and tablet — it is a direct
+          child of the shell, which spans the whole page, so it holds for
+          the full scroll rather than only while the about block is in
+          view. Desktop is a fixed viewport that never scrolls, so it goes
+          back to being ordinary flow there. */}
+      <SiteHeader />
+      <HomeExperience />
     </LifelineShell>
   )
 }

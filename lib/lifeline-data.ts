@@ -69,27 +69,13 @@ export function defineLifeline(input: DefineLifelineInput): LifelineRecord {
   const { milestones, ...record } = input
   const lastYear = input.endYear ?? LIFELINE_CURRENT_YEAR
   const markers: LifelineMarker[] = []
-  const today = new Date()
 
   for (let year = input.birthYear; year <= lastYear; year++) {
     const milestone = milestones[year]
-    const birthdayPending =
-      year === LIFELINE_CURRENT_YEAR &&
-      input.birthday &&
-      (today.getMonth() + 1 < input.birthday.month ||
-        (today.getMonth() + 1 === input.birthday.month &&
-          today.getDate() < input.birthday.day))
-    const age = birthdayPending ? year - input.birthYear - 1 : undefined
-
     markers.push(
       milestone
-        ? { year, ...(age !== undefined && { age }), ...milestone }
-        : {
-            id: `year-${year}`,
-            year,
-            events: [],
-            ...(age !== undefined && { age }),
-          },
+        ? { year, ...milestone }
+        : { id: `year-${year}`, year, events: [] },
     )
   }
 

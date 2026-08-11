@@ -1,0 +1,225 @@
+{
+  "studies": [
+    {
+      "slug": "zeme-redesign",
+      "product": "Zeme Redesign",
+      "year": "2025",
+      "status": "Shipped",
+      "statusColor": "#0072f5",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/thumbnail-msjndzx6.png"
+        },
+        {
+          "id": "n2",
+          "type": "text",
+          "title": "What's Zeme",
+          "copy": "Zeme is a real estate platform operating across both enterprise B2B and consumer B2C in New York City's rental market. I came on as the founding designer, meaning there was no prior design foundation. The product had no system, no visual language, no research process. I owned it all: product design, visual design, keynote decks, discovery, and the design system that made everything coherent.",
+          "muted": false
+        },
+        {
+          "id": "n4",
+          "type": "text",
+          "title": "Problem",
+          "copy": "A dual-sided real estate platform serving enterprise clients and everyday renters simultaneously is a rare design challenge. The B2B side demanded precision, credibility, and density — brokers and property managers needed powerful tools. The B2C side needed warmth, clarity, and trust — renters navigating NYC apartments are already overwhelmed. There was no existing design infrastructure to work from, and no dedicated research function. I had to build the foundation while shipping the product.",
+          "muted": false
+        },
+        {
+          "id": "n3",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/b2b-msjnpbd0.png"
+        },
+        {
+          "id": "n6",
+          "type": "text",
+          "title": "Ship faster with no data",
+          "copy": "We shipped the first redesign in 3 months with zero formal user research moving on instinct, client context, and real-time signals. It was a hard call, but the right one. Shipping gave us what upfront research couldn't: real behavior from real users. We saw where people dropped off, where the flow confused them, and where it broke from their mental models. Then we rebuilt the flows from scratch — this time with clients in the room, workshopping decisions instead of guessing.",
+          "muted": false
+        },
+        {
+          "id": "n5",
+          "type": "image",
+          "wide": true,
+          "columns": 2,
+          "src": "/uploads/left-msjntm1i.png",
+          "srcB": "/uploads/right-msjntnx2.png"
+        },
+        {
+          "id": "n7",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/backtoback-msjo2rxc.png"
+        },
+        {
+          "id": "n11",
+          "type": "text",
+          "title": "Success",
+          "copy": "The redesign shipped and immediately moved the needle. 54% of customers onboarded without friction. The application process saw a +30% increase in completion. The platform now covers over $30M in rental estate for clients across New York City.",
+          "muted": false
+        },
+        {
+          "id": "n9",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/ai-msjo4j6w.png"
+        },
+        {
+          "id": "n10",
+          "type": "text",
+          "copy": "AI Interface by using Zeme's LLM",
+          "muted": true
+        }
+      ]
+    },
+    {
+      "slug": "agentic",
+      "product": "Zeme Agentic Search",
+      "year": "2026",
+      "status": "Shipped",
+      "statusColor": "#0072f5",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/agentic-msjrhwqi.png"
+        },
+        {
+          "id": "n2",
+          "type": "text",
+          "title": "Context",
+          "copy": "Zeme originally started as an organic rental search engine, helping renters discover listings in one place. But the rental market was already crowded with established platforms like Zillow and Redfin. Instead of competing directly with those marketplaces, we saw an opportunity to rethink Zeme’s role entirely. We pivoted from being another destination renters had to visit into an AI-powered rental assistant built around messaging. The new direction focused less on browsing and more on delegation. Rather than asking renters to repeatedly search, filter, and monitor listings themselves, Zeme could understand what they wanted and do that work on their behalf. The pivot changed our product question from “How do we improve rental search?” to “What if renters didn’t have to search at all?”",
+          "muted": false
+        },
+        {
+          "id": "n3",
+          "type": "text",
+          "title": "Problem",
+          "copy": "Rental search is repetitive, fragmented, and highly time-sensitive. Renters often bounce between multiple platforms, recreate the same filters, compare dozens of listings, and continuously check for new inventory before good options disappear. Traditional search tools also struggle with how people actually make decisions. Renters think in preferences and tradeoffs, not rigid filters. Someone might want a quieter neighborhood but be willing to pay more for a shorter commute, or accept a smaller apartment if parking is included. That type of intent is difficult to express through checkboxes and dropdowns. The core problem wasn’t access to listings. It was the amount of manual effort required to continuously search, evaluate, and keep up with a changing rental market.",
+          "muted": false
+        },
+        {
+          "id": "n10",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/2-msl4ma06.png"
+        },
+        {
+          "id": "n4",
+          "type": "text",
+          "title": "Solution",
+          "copy": "We kept the original Zeme website experience for users who preferred a traditional browsing interface, but redesigned the core product around a much simpler interaction through iMessage. Instead of configuring a long list of filters, renters could describe their needs conversationally in chat. A user could say, “Find me a one-bedroom under $3,000, pet-friendly, near downtown, with a reasonable commute.” Zeme interprets the request, searches across external rental sources, and surfaces relevant listings directly within the conversation. Users can continue refining their search naturally in the same thread, adjusting preferences like budget or amenities as their needs evolve. The focus shifted from redesigning the website into an agentic experience, to optimizing the AX/UX of the messaging flow where most users actually interact with Zeme, while still maintaining the website as an alternative entry point for those who prefer a more traditional search experience.",
+          "muted": false
+        },
+        {
+          "id": "n9",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/3-msl4mclb.png"
+        },
+        {
+          "id": "n5",
+          "type": "text",
+          "title": "A New Agentic Experience",
+          "copy": "The biggest change was moving Zeme from a search tool into an agent that could act on a renter’s behalf. Traditional rental products wait for users to return and perform another search. Zeme could instead continue working after the initial conversation. Once it understood a renter’s preferences, the agent could monitor new inventory, evaluate potential matches, and proactively send updates when something relevant appeared. This created a new interaction model: tell Zeme, Zeme searches, Zeme monitors, and Zeme updates you. Designing around agentic AI also meant thinking beyond individual screens. The product needed memory, context, proactive behavior, and the ability to adapt as a renter’s preferences changed over time.",
+          "muted": false
+        },
+        {
+          "id": "n8",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/4-msl4mf4o.png"
+        },
+        {
+          "id": "n6",
+          "type": "text",
+          "title": "Design Challenge",
+          "copy": "The pivot introduced a new challenge: how do you design rental search when the interface is no longer primarily a search interface? Traditional products make their logic visible through filters, maps, sorting controls, and listing cards. With an AI agent, much of that decision-making happens behind the scenes. As Founding Product Designer, I had to think about how Zeme should interpret ambiguous requests, communicate what it understood, ask useful follow-up questions, remember preferences, and proactively recommend listings without overwhelming users. Trust became just as important as usability. The agent needed to feel capable enough to search autonomously while still giving renters enough visibility and control to understand why certain listings were being recommended.",
+          "muted": false
+        }
+      ]
+    },
+    {
+      "slug": "pillarbiome",
+      "product": "PillarBiome",
+      "year": "2026",
+      "status": "Pre-Seed",
+      "statusColor": "#007514",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/left-mskrb5ut.png"
+        },
+        {
+          "id": "n4",
+          "type": "text",
+          "copy": "Joined Pillar Biome as a founding design consultant to shape the product experience from zero —> no system, no patterns, no precedent.",
+          "muted": true
+        },
+        {
+          "id": "n2",
+          "type": "text",
+          "title": "Context",
+          "copy": "Pillar Biome is an early-stage biotech startup building personalized gut health insights through microbiome analysis. The platform helps users understand their biological data through a guided, clinical-feeling app experience. I joined pre-product as the sole designer, working across brand, system, and interface simultaneously.",
+          "muted": false
+        },
+        {
+          "id": "n3",
+          "type": "text",
+          "title": "Issue with the current product",
+          "copy": "The founding team had deep science credibility but no design foundation. There was no visual language, no component library, and no defined user experience. The product needed to feel medically trustworthy without being cold — a rare balance in health tech. At the same time, the team was moving fast toward a seed fundraise, meaning a polished, demoable product was urgent.",
+          "muted": false
+        },
+        {
+          "id": "n5",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/website-mskrbixr.png"
+        },
+        {
+          "id": "n6",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/ai-mskrbmqc.png"
+        },
+        {
+          "id": "n7",
+          "type": "text",
+          "title": "Design system, AI-accelerated",
+          "copy": "I built a design system end-to-end using AI-assisted workflows — leveraging Claude and Figma to accelerate token generation, component scaffolding, and documentation. This cut system buildout time by roughly 60% without sacrificing quality or coherence.",
+          "muted": false
+        },
+        {
+          "id": "n10",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/techcrunch-mskrc7l5.png"
+        },
+        {
+          "id": "n9",
+          "type": "text",
+          "copy": "Featured in TechCrunch's Top 200 Disrupt startups. Secured $100K in pre-seed funding shortly after the product demo launched.",
+          "muted": true
+        }
+      ]
+    }
+  ]
+}

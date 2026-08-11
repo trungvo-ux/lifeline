@@ -5,6 +5,7 @@ import {
   LIFELINE_STICKY_LEFT,
   LIFELINE_STICKY_SHIELD_WIDTH,
 } from "./lifeline-labels"
+import { LIFELINE_CONTENT_MAX_WIDTH } from "./lifeline-layout"
 import { clamp, snapToDevicePixel } from "./lifeline-utils"
 import type { LifelineMode } from "./types"
 
@@ -54,6 +55,37 @@ const EMBED_BOUNDARY_MAX_HOLD_MS = 900
  * properly on screen, rather than starting cold under the reader's eyes.
  */
 const EMBED_INTRO_ARM_MARGIN = "0px 0px 200px 0px"
+const LIFELINE_POSITION_STORAGE_PREFIX = "lifeline:position:"
+const POSITION_SAVE_DELAY_MS = 80
+
+function readStoredPosition(key?: string) {
+  if (!key || typeof window === "undefined") return null
+
+  try {
+    const stored = window.sessionStorage.getItem(
+      `${LIFELINE_POSITION_STORAGE_PREFIX}${key}`,
+    )
+    if (stored === null) return null
+
+    const value = Number(stored)
+    return Number.isFinite(value) && value >= 0 ? value : null
+  } catch {
+    return null
+  }
+}
+
+function storePosition(key: string | undefined, value: number) {
+  if (!key || typeof window === "undefined") return
+
+  try {
+    window.sessionStorage.setItem(
+      `${LIFELINE_POSITION_STORAGE_PREFIX}${key}`,
+      String(value),
+    )
+  } catch {
+    // Storage is optional in locked-down browsing contexts.
+  }
+}
 
 function normalizeWheelDelta(event: WheelEvent) {
   let delta = Math.abs(event.deltaX) > Math.abs(event.deltaY)
@@ -123,6 +155,7 @@ function hasReleasableScroll(section: HTMLElement) {
 
 interface LifelineScrollOptions {
   mode?: LifelineMode
+  positionKey?: string
   isCoarsePointer?: boolean
   introLocked?: boolean
   introAnimating?: boolean
@@ -169,6 +202,8 @@ export function useLifelineScroll(
   const introGetTrackProgressRef = useRef(options.introGetTrackProgress)
   const applyTranslateRef = useRef<(value: number) => void>(() => {})
   const scheduleMeasureRef = useRef<() => void>(() => {})
+  const positionKeyRef = useRef(options.positionKey)
+  const positionSaveTimerRef = useRef(0)
   const modeRef = useRef<LifelineMode>(options.mode ?? "auto")
   const isEmbedRef = useRef(false)
   const modeResolvedAt = useRef(0)
@@ -183,6 +218,7 @@ export function useLifelineScroll(
   const [introArmed, setIntroArmed] = useState(false)
 
   modeRef.current = options.mode ?? "auto"
+  positionKeyRef.current = options.positionKey
   isCoarsePointerRef.current = options.isCoarsePointer ?? false
   introLockedRef.current = options.introLocked ?? false
   introAnimatingRef.current = options.introAnimating ?? false
@@ -304,6 +340,25 @@ export function useLifelineScroll(
     })
   }, [])
 
+  const persistPosition = useCallback((immediate = false) => {
+    window.clearTimeout(positionSaveTimerRef.current)
+
+    const save = () => {
+      positionSaveTimerRef.current = 0
+      storePosition(positionKeyRef.current, translatePx.current)
+    }
+
+    if (immediate) {
+      save()
+      return
+    }
+
+    positionSaveTimerRef.current = window.setTimeout(
+      save,
+      POSITION_SAVE_DELAY_MS,
+    )
+  }, [])
+
   const applyTranslate = useCallback(
     (value: number) => {
       const max = maxTranslate.current
@@ -320,8 +375,18 @@ export function useLifelineScroll(
 
       applyLabelSticky(next)
       updateFades()
+
+      // Intro frames are deterministic and should not overwrite the last
+      // position the reader chose. User-driven movement is persisted with a
+      // short debounce and flushed synchronously during navigation.
+      if (
+        initialized.current &&
+        !(introAnimatingRef.current && introStartedRef.current)
+      ) {
+        persistPosition()
+      }
     },
-    [applyLabelSticky, updateFades],
+    [applyLabelSticky, persistPosition, updateFades],
   )
 
   applyTranslateRef.current = applyTranslate
@@ -414,9 +479,18 @@ export function useLifelineScroll(
     if (followChrome && navRight !== null) {
       endInset.current = navRight
     } else {
-      // No chrome to align with, or none this module spans — end the track
-      // at the stage's own right edge instead.
-      endInset.current = stageRect.width - NAV_HORIZONTAL_PADDING
+      // No chrome to align with, or none this module spans. Stop where a
+      // centered content container would end rather than at the viewport
+      // edge — a full-bleed rail leaves the last milestone jammed against
+      // the right side with nothing to breathe against.
+      const centered =
+        (stageRect.width + LIFELINE_CONTENT_MAX_WIDTH) / 2 -
+        NAV_HORIZONTAL_PADDING
+
+      endInset.current = Math.min(
+        stageRect.width - NAV_HORIZONTAL_PADDING,
+        centered,
+      )
     }
 
     const lastMarker = markerRefs.current[markerCount - 1]
@@ -446,10 +520,12 @@ export function useLifelineScroll(
     const max = measureLayout()
 
     if (!initialized.current) {
-      // A skipped intro parks the rail where the intro would have settled
-      // it — its end, the present. Embedded is no different: it is the same
-      // intro and the same resting place.
-      translatePx.current = introSkippedRef.current ? max : 0
+      const storedPosition = readStoredPosition(positionKeyRef.current)
+
+      // Restore the reader's exact rail offset before first paint. Without a
+      // saved position, a skipped intro still parks at Present as before.
+      translatePx.current =
+        storedPosition ?? (introSkippedRef.current ? max : 0)
       initialized.current = true
     }
 
@@ -966,6 +1042,9 @@ export function useLifelineScroll(
     section.addEventListener("pointercancel", endDrag)
     window.addEventListener("keydown", onKeyDown)
 
+    const persistOnPageHide = () => persistPosition(true)
+    window.addEventListener("pagehide", persistOnPageHide)
+
     return () => {
       cancelAnimationFrame(frameId)
       stopMomentum()
@@ -982,6 +1061,8 @@ export function useLifelineScroll(
       section.removeEventListener("pointerup", endDrag)
       section.removeEventListener("pointercancel", endDrag)
       window.removeEventListener("keydown", onKeyDown)
+      window.removeEventListener("pagehide", persistOnPageHide)
+      persistPosition(true)
       dragging.current = false
       gestureAxis.current = null
       activePointerId.current = null
@@ -993,7 +1074,14 @@ export function useLifelineScroll(
       section.style.cursor = ""
       section.style.touchAction = ""
     }
-  }, [applyTranslate, isScrollLocked, markerCount, measureLayout, resolveMode])
+  }, [
+    applyTranslate,
+    isScrollLocked,
+    markerCount,
+    measureLayout,
+    persistPosition,
+    resolveMode,
+  ])
 
   return {
     sectionRef,

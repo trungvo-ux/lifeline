@@ -26,13 +26,54 @@ export const LIFELINE_RAIL_SCALE_POWER = 0.45
  */
 export const LIFELINE_FADE_SCALE_MAX = 1.5
 
-export function useLifelineIntro(markerWidths: number[]) {
-  // Skip straight to the settled end state for users who prefer reduced motion.
-  const [shouldPlay] = useState(
+const LIFELINE_INTRO_STORAGE_PREFIX = "lifeline:intro-played:"
+
+function hasPlayedIntro(persistenceKey?: string) {
+  if (!persistenceKey || typeof window === "undefined") return false
+
+  try {
+    return (
+      window.sessionStorage.getItem(
+        `${LIFELINE_INTRO_STORAGE_PREFIX}${persistenceKey}`,
+      ) === "1"
+    )
+  } catch {
+    // Storage can be unavailable in locked-down browsing contexts. In that
+    // case the intro remains a harmless per-mount animation.
+    return false
+  }
+}
+
+function rememberIntro(persistenceKey?: string) {
+  if (!persistenceKey || typeof window === "undefined") return
+
+  try {
+    window.sessionStorage.setItem(
+      `${LIFELINE_INTRO_STORAGE_PREFIX}${persistenceKey}`,
+      "1",
+    )
+  } catch {
+    // See hasPlayedIntro: persistence is an enhancement, not a requirement.
+  }
+}
+
+export function useLifelineIntro(
+  markerWidths: number[],
+  enabled = true,
+  persistenceKey?: string,
+) {
+  // Skip straight to the settled end state for users who prefer reduced
+  // motion — or for a layout that opts out of the intro entirely.
+  const [prefersMotion] = useState(
     () =>
       typeof window === "undefined" ||
       !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
   )
+  // A history/back navigation remounts the homepage. Remembering the first
+  // run for this tab keeps that remount in the settled state instead of
+  // replaying the entire journey to Present.
+  const [wasAlreadyPlayed] = useState(() => hasPlayedIntro(persistenceKey))
+  const shouldPlay = enabled && prefersMotion && !wasAlreadyPlayed
   const [isPlaying, setIsPlaying] = useState(true)
   const [isComplete, setIsComplete] = useState(false)
   const introTimeoutRef = useRef(0)
@@ -102,6 +143,7 @@ export function useLifelineIntro(markerWidths: number[]) {
   }, [])
 
   const startIntroTimer = useCallback(() => {
+    rememberIntro(persistenceKey)
     window.clearTimeout(introTimeoutRef.current)
     setIsPlaying(true)
     setIsComplete(false)
@@ -109,7 +151,7 @@ export function useLifelineIntro(markerWidths: number[]) {
     introTimeoutRef.current = window.setTimeout(() => {
       setIsPlaying(false)
     }, introDuration)
-  }, [introDuration])
+  }, [introDuration, persistenceKey])
 
   useEffect(() => {
     return () => window.clearTimeout(introTimeoutRef.current)

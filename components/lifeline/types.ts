@@ -52,7 +52,11 @@ export type LifelineEventEffect = "fireworks" | "fireworks-argentina"
  * and/or a click-triggered easter egg effect.
  */
 export interface LifelineEventObject {
+  /** Headline for the milestone — rendered in black above the text. */
+  title?: string
   text: string | LifelineEventSegment[]
+  /** A call to action on its own line under the text ("Read study"). */
+  link?: { label: string; href: string }
   image?: LifelineEventImage
   effect?: LifelineEventEffect
 }
@@ -66,11 +70,11 @@ export interface LifelineMarker {
   id: string
   /** Position on the numeric axis — a year, or any sequential unit (e.g. tournament day). */
   year: number
-  /** Shown above the label; defaults to year - birthYear. Strings allowed for round tags etc. */
-  age?: number | string
   /** Shown in place of the raw year — e.g. "Jun 16" on a day-based timeline. */
   label?: string
   events: LifelineEvent[]
+  /** The milestone's square. Omit the src to leave the gray placeholder. */
+  media?: Partial<LifelineEventImage>
   /** Small emblems (team shields etc.) rendered above the events. */
   badges?: { src: string; alt: string }[]
   /** Floating media cards anchored to this marker's stretch of the timeline. */
@@ -105,7 +109,6 @@ export type LifelineMode = "auto" | "page" | "embed"
 
 export interface LifelineProps {
   markers: LifelineMarker[]
-  birthYear: number
   className?: string
   title?: string
   mode?: LifelineMode

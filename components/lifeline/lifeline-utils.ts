@@ -58,7 +58,12 @@ export function getMarkerWidth(marker: LifelineMarker, nextYear?: number) {
   const hasContent = hasMarkerContent(marker)
   const hasPeople = hasMarkerPeople(marker)
 
-  if (!nextYear) return hasContent ? 360 : 80
+  // The last marker has no neighbour to space against, so its own width
+  // *is* the trailing room. It needs enough to clear the 200px right fade
+  // plus the 288px text column, or the scrub bottoms out with the final
+  // milestone half-faded against the edge instead of sitting as the
+  // focal point it should be.
+  if (!nextYear) return hasContent ? 640 : 80
   if (!hasContent) return 80
 
   const peopleOnly =
@@ -69,5 +74,5 @@ export function getMarkerWidth(marker: LifelineMarker, nextYear?: number) {
   if (peopleOnly) return 220
 
   const gap = Math.max(1, nextYear - marker.year)
-  return Math.min(420, Math.max(290, gap * 36))
+  return Math.min(480, Math.max(400, gap * 36))
 }

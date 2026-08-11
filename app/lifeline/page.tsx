@@ -9,6 +9,7 @@ import {
   LifelineShell,
   LifelineStage,
 } from "@/components/lifeline-shell"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { personalLifeline } from "@/lib/lifeline-personal"
 
 /**
@@ -23,12 +24,13 @@ import { personalLifeline } from "@/lib/lifeline-personal"
 export default function LifelinePage() {
   return (
     <LifelineShell>
-      <LifelineNav logo={<span className="text-sm font-medium">Lifeline</span>} />
+      <LifelineNav logo={<span className="text-sm font-medium">Lifeline</span>}>
+        <ThemeSwitcher />
+      </LifelineNav>
 
       <LifelineStage>
         <Lifeline
           markers={personalLifeline.markers}
-          birthYear={personalLifeline.birthYear}
           title={personalLifeline.name}
           className="h-full"
         />
