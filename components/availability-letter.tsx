@@ -5,7 +5,6 @@ import { createPortal } from "react-dom"
 
 const CLOSE_FALLBACK_MS = 150
 const SEND_MS = 700
-const CONTACT_EMAIL = "trungvanvo23@gmail.com"
 const SESSION_SEND_COUNT_KEY = "portfolio-letter-send-count"
 const SESSION_SEND_LIMIT = 3
 
@@ -96,7 +95,7 @@ export function AvailabilityLetter() {
     }, closeMs)
   }, [clearTimer, isSending])
 
-  function sendLetter(event: FormEvent<HTMLFormElement>) {
+  async function sendLetter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const letter = message.trim()
     if (!letter || isSending) return
@@ -154,19 +153,35 @@ export function AvailabilityLetter() {
 
     timerRef.current = window.setTimeout(
       () => {
-        const subject = encodeURIComponent("A note from your portfolio")
-        const body = encodeURIComponent(
-          `Dear Trung,\n\n${letter}\n\nSincerely,\n${senderEmail}`
-        )
+        void fetch("/api/contact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subject: "A note from your portfolio",
+            body: `Dear Trung,\n\n${letter}\n\nSincerely,\n${senderEmail}`,
+            website: "",
+          }),
+        })
+          .then(async (response) => {
+            if (!response.ok) throw new Error("Contact is unavailable")
+            return response.json() as Promise<{ href?: string }>
+          })
+          .then(({ href }) => {
+            if (!href?.startsWith("mailto:")) throw new Error("Invalid contact link")
 
-        setIsVisible(false)
-        setIsMounted(false)
-        setIsClosing(false)
-        setIsSending(false)
-        setMessage("")
-        setEmail("")
-        setEmailError(false)
-        window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
+            setIsVisible(false)
+            setIsMounted(false)
+            setIsClosing(false)
+            setIsSending(false)
+            setMessage("")
+            setEmail("")
+            setEmailError(false)
+            window.location.href = href
+          })
+          .catch(() => {
+            setIsSending(false)
+            setSpamQuip("Email is unavailable right now. Please try again.")
+          })
       },
       reduceMotion ? 80 : SEND_MS
     )

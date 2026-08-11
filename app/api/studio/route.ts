@@ -12,15 +12,16 @@ import { getStudies, STUDIES_PATH } from "@/lib/study-server"
 export const isEditable = process.env.NODE_ENV === "development"
 
 export async function GET() {
+  if (!isEditable) {
+    return new NextResponse(null, { status: 404 })
+  }
+
   return NextResponse.json({ studies: await getStudies(), editable: isEditable })
 }
 
 export async function POST(request: Request) {
   if (!isEditable) {
-    return NextResponse.json(
-      { error: "The studio only saves in development." },
-      { status: 403 },
-    )
+    return new NextResponse(null, { status: 404 })
   }
 
   let library

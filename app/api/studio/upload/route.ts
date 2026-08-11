@@ -22,10 +22,7 @@ const EXTENSIONS: Record<string, string> = {
 
 export async function POST(request: Request) {
   if (process.env.NODE_ENV !== "development") {
-    return NextResponse.json(
-      { error: "Uploads only work in development." },
-      { status: 403 },
-    )
+    return new NextResponse(null, { status: 404 })
   }
 
   const form = await request.formData()

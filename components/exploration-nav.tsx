@@ -1,6 +1,6 @@
 "use client"
 
-import type { CSSProperties, FocusEvent, PointerEvent } from "react"
+import type { CSSProperties, FocusEvent, MouseEvent, PointerEvent } from "react"
 import { useEffect, useRef, useState } from "react"
 import { cn } from "@/lib/utils"
 
@@ -12,12 +12,12 @@ const socialLinks = [
   },
   {
     label: "Email",
-    href: "mailto:trungvanvo23@gmail.com",
+    href: "#contact",
     tooltip: "Send me an email",
   },
   {
     label: "X",
-    href: "https://x.com/Panvan23",
+    href: "https://x.com/trungvo23",
     tooltip: "Follow me on X",
   },
 ]
@@ -94,6 +94,24 @@ export function ExplorationNav({
     index: number
   ) {
     activate(index, event.currentTarget)
+  }
+
+  async function handleEmailClick(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        subject: "Hello from your portfolio",
+        body: "Hi Trung,\n\n",
+        website: "",
+      }),
+    })
+
+    if (!response.ok) return
+    const { href } = (await response.json()) as { href?: string }
+    if (href?.startsWith("mailto:")) window.location.href = href
   }
 
   const activeLink = socialLinks[activeIndex]
@@ -174,6 +192,7 @@ export function ExplorationNav({
           target={link.href.startsWith("http") ? "_blank" : undefined}
           rel={link.href.startsWith("http") ? "noreferrer" : undefined}
           key={link.label}
+          onClick={link.label === "Email" ? handleEmailClick : undefined}
           onPointerEnter={(event) => handlePointerEnter(event, index)}
           onFocus={(event) => activate(index, event.currentTarget)}
         >
