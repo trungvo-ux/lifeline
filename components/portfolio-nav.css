@@ -1,0 +1,11 @@
+.portfolio-nav { position: absolute; top: 30px; right: 32px; z-index: 10; display: flex; flex-direction: column; align-items: flex-end; gap: 15px; font: 500 16px/1.2 Inter, Arial, sans-serif; }
+.portfolio-nav a { color: #696969; text-decoration: none; transition: color 180ms ease; }
+.portfolio-nav a:focus-visible, .portfolio-nav a[aria-current="page"] { color: #111; text-decoration: none; }
+.portfolio-nav a:focus-visible { outline: 2px solid #626168; outline-offset: 4px; }
+@media (hover: hover) and (pointer: fine) { .portfolio-nav a:hover { color: #111; } }
+@media (max-width: 700px) {
+  .portfolio-nav { top: calc(12px + env(safe-area-inset-top, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); gap: 0; font-size: 16px; }
+  .portfolio-nav a { display: flex; min-height: 32px; align-items: center; justify-content: flex-end; padding-inline: 8px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; }
+  .portfolio-nav a:active { color: #111; transform: scale(.97); }
+}
+@media (prefers-reduced-motion: reduce) { .portfolio-nav a { transition: none; } }

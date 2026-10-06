@@ -1,0 +1,9 @@
+.email-page { display: flex; min-height: 100dvh; width: min(100% - 48px, 640px); margin: 0 auto; flex-direction: column; justify-content: center; gap: 24px; padding: 160px 0 64px; color: #111; font-family: Inter, Arial, sans-serif; }
+.email-page h1 { margin: 0; font-size: clamp(32px, 6vw, 64px); font-weight: 500; }
+.email-page form { display: grid; gap: 20px; }
+.email-page label { display: grid; gap: 8px; font-size: 16px; }
+.email-page input, .email-page textarea { width: 100%; border: 1px solid #bfbfc3; border-radius: 12px; padding: 14px 16px; background: #fff; color: #111; font: inherit; }
+.email-page input:focus-visible, .email-page textarea:focus-visible { outline: 2px solid #626168; outline-offset: 2px; }
+.email-page button { justify-self: start; border: 0; border-radius: 12px; padding: 12px 24px; background: #111; color: #fff; font: inherit; cursor: pointer; }
+.email-page button:disabled { opacity: .5; cursor: wait; }
+.email-page p { margin: 0; color: #a33; }

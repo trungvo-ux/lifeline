@@ -31,6 +31,7 @@ export function ClickSound() {
       if (!interactive || interactive.getAttribute("aria-disabled") === "true") {
         return
       }
+      if (interactive.closest("[data-soundboard]")) return
 
       // Photo cards opt in as a whole, but their upload label dispatches a
       // second click to the hidden file input. Let that input own the sound so
@@ -58,7 +59,7 @@ export function ClickSound() {
   return (
     <audio
       ref={audioRef}
-      src="/audio/click.mp3"
+      src="/audio/bubble.mp3"
       preload="auto"
       aria-hidden="true"
     />

@@ -1,0 +1,51 @@
+.works-page { --works-card-a: 375px; --works-card-b: 345px; --works-card-c: 315px; --works-card-d: 470px; --works-first-half: 187.5px; --works-gap: 23px; --works-cycle: calc(var(--works-card-a) + var(--works-gap) + var(--works-card-b) + var(--works-gap) + var(--works-card-c) + var(--works-gap) + var(--works-card-d) + var(--works-gap)); --works-edge: 16px; --works-intro-shift: calc(50vw - var(--works-first-half) - var(--works-edge)); min-height: 100dvh; overflow: hidden; position: relative; background: #fff; color: #111; font-family: Inter, Arial, sans-serif; }
+.works-main { position: relative; display: flex; min-height: 100dvh; flex-direction: column; align-items: center; justify-content: center; }
+.works-viewport { position: relative; width: 100%; height: 529px; overflow: visible; }
+.works-track { position: absolute; top: 0; left: calc(50% - var(--works-first-half)); display: flex; width: max-content; align-items: center; gap: var(--works-gap); transform: translateX(calc(0px - var(--works-cycle) - var(--works-cycle))); }
+.works-card { position: relative; display: block; flex: 0 0 var(--works-card-a); width: var(--works-card-a); height: 365px; overflow: hidden; padding: 0; border: 0; border-radius: 32px; background: #d9d9d9; text-align: left; cursor: none; isolation: isolate; }
+.works-card[data-shape="1"] { flex-basis: var(--works-card-b); width: var(--works-card-b); height: 529px; border-radius: 42px; }
+.works-card[data-shape="2"] { flex-basis: var(--works-card-c); width: var(--works-card-c); height: 410px; border-radius: 38px; }
+.works-card[data-shape="3"] { flex-basis: var(--works-card-d); width: var(--works-card-d); height: 290px; border-radius: 26px; }
+.works-page[data-intro-ready="false"] .works-card { opacity: 0; }
+.works-card img { object-fit: cover; }
+.works-card:focus-visible { outline: 3px solid #111; outline-offset: 5px; cursor: pointer; }
+.works-caption { position: absolute; bottom: 32px; left: 50%; min-height: 58px; font-size: 24px; font-weight: 500; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.works-caption span { display: block; }
+.works-caption span:last-child { margin-top: 4px; color: #949494; }
+.t-text-swap {
+  display: inline-block;
+  transform: translateY(0);
+  filter: blur(0);
+  opacity: 1;
+  transition:
+    transform var(--text-swap-dur) var(--text-swap-ease),
+    filter    var(--text-swap-dur) var(--text-swap-ease),
+    opacity   var(--text-swap-dur) var(--text-swap-ease);
+  will-change: transform, filter, opacity;
+}
+.t-text-swap.is-exit {
+  transform: translateY(calc(var(--text-swap-translate-y) * -1));
+  filter: blur(var(--text-swap-blur));
+  opacity: 0;
+}
+.t-text-swap.is-enter-start {
+  transform: translateY(var(--text-swap-translate-y));
+  filter: blur(var(--text-swap-blur));
+  opacity: 0;
+  transition: none;
+}
+.t-text-swap[data-visible="false"] { opacity: 0; }
+.works-cursor { position: fixed; top: 0; left: 0; z-index: 20; border-radius: 12px; padding: 12px 24px; background: #ececef; color: #626168; font-size: 16px; pointer-events: none; opacity: 0; transition: opacity 160ms ease; white-space: nowrap; }
+.works-cursor[data-visible="true"] { opacity: 1; }
+@media (max-width: 700px) {
+  .works-page { --works-card-a: 68vw; --works-card-b: 64vw; --works-card-c: 60vw; --works-card-d: 80vw; --works-first-half: 34vw; --works-gap: 16px; }
+  .works-main { padding: 148px 0 64px; }
+  .works-viewport { height: min(60vh, 440px); }
+  .works-card { height: min(52vh, 370px); border-radius: 24px; }
+  .works-card[data-shape="1"] { height: min(60vh, 440px); border-radius: 30px; }
+  .works-card[data-shape="2"] { height: min(48vh, 350px); border-radius: 28px; }
+  .works-card[data-shape="3"] { height: min(38vh, 275px); border-radius: 22px; }
+  .works-caption { bottom: 24px; font-size: 20px; }
+}
+@media (hover: none) { .works-card { cursor: pointer; } .works-cursor { display: none; } }
+@media (prefers-reduced-motion: reduce) { .works-track { transform: translateX(calc(0px - var(--works-cycle) - var(--works-cycle) - var(--works-intro-shift))); } .works-page[data-intro-ready="false"] .works-card { opacity: 1; } .t-text-swap { transition: none !important; } .works-cursor { transition: none; } }

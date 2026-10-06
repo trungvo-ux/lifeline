@@ -4,15 +4,17 @@
       "slug": "zeme-redesign",
       "product": "Zeme Redesign",
       "year": "2025",
-      "status": "Shipped",
+      "status": "Redesign",
       "statusColor": "#0072f5",
+      "client": "Zeme",
+      "url": "https://zeme.io/",
       "nodes": [
         {
-          "id": "n1",
+          "id": "n3",
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/thumbnail-msjndzx6.png"
+          "src": "/uploads/b2b-msjnpbd0.png"
         },
         {
           "id": "n2",
@@ -22,6 +24,13 @@
           "muted": false
         },
         {
+          "id": "n1",
+          "type": "image",
+          "wide": true,
+          "columns": 1,
+          "src": "/uploads/thumbnail-msjndzx6.png"
+        },
+        {
           "id": "n4",
           "type": "text",
           "title": "Problem",
@@ -29,11 +38,12 @@
           "muted": false
         },
         {
-          "id": "n3",
+          "id": "n5",
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/b2b-msjnpbd0.png"
+          "src": "/uploads/left-msjntm1i.png",
+          "srcB": "/uploads/right-msjntnx2.png"
         },
         {
           "id": "n6",
@@ -41,14 +51,6 @@
           "title": "Ship faster with no data",
           "copy": "We shipped the first redesign in 3 months with zero formal user research moving on instinct, client context, and real-time signals. It was a hard call, but the right one. Shipping gave us what upfront research couldn't: real behavior from real users. We saw where people dropped off, where the flow confused them, and where it broke from their mental models. Then we rebuilt the flows from scratch — this time with clients in the room, workshopping decisions instead of guessing.",
           "muted": false
-        },
-        {
-          "id": "n5",
-          "type": "image",
-          "wide": true,
-          "columns": 2,
-          "src": "/uploads/left-msjntm1i.png",
-          "srcB": "/uploads/right-msjntnx2.png"
         },
         {
           "id": "n7",
@@ -85,6 +87,8 @@
       "year": "2026",
       "status": "Shipped",
       "statusColor": "#0072f5",
+      "client": "Zeme",
+      "url": "https://zeme.io/",
       "nodes": [
         {
           "id": "n1",
@@ -92,13 +96,6 @@
           "wide": true,
           "columns": 1,
           "src": "/uploads/agentic-msjrhwqi.png"
-        },
-        {
-          "id": "n2",
-          "type": "text",
-          "title": "Context",
-          "copy": "Zeme originally started as an organic rental search engine, helping renters discover listings in one place. But the rental market was already crowded with established platforms like Zillow and Redfin. Instead of competing directly with those marketplaces, we saw an opportunity to rethink Zeme’s role entirely. We pivoted from being another destination renters had to visit into an AI-powered rental assistant built around messaging. The new direction focused less on browsing and more on delegation. Rather than asking renters to repeatedly search, filter, and monitor listings themselves, Zeme could understand what they wanted and do that work on their behalf. The pivot changed our product question from “How do we improve rental search?” to “What if renters didn’t have to search at all?”",
-          "muted": false
         },
         {
           "id": "n3",
@@ -152,74 +149,110 @@
       ]
     },
     {
-      "slug": "pillarbiome",
-      "product": "PillarBiome",
+      "slug": "lookbook",
+      "product": "Lookbook",
       "year": "2026",
-      "status": "Pre-Seed",
-      "statusColor": "#007514",
+      "status": "MCP",
+      "statusColor": "#0072f5",
+      "role": "Design Engineer",
+      "url": "https://trungvo.xzy",
       "nodes": [
         {
           "id": "n1",
           "type": "image",
-          "wide": true,
+          "wide": false,
           "columns": 1,
-          "src": "/uploads/left-mskrb5ut.png"
-        },
-        {
-          "id": "n4",
-          "type": "text",
-          "copy": "Joined Pillar Biome as a founding design consultant to shape the product experience from zero —> no system, no patterns, no precedent.",
-          "muted": true
-        },
-        {
-          "id": "n2",
-          "type": "text",
-          "title": "Context",
-          "copy": "Pillar Biome is an early-stage biotech startup building personalized gut health insights through microbiome analysis. The platform helps users understand their biological data through a guided, clinical-feeling app experience. I joined pre-product as the sole designer, working across brand, system, and interface simultaneously.",
-          "muted": false
-        },
-        {
-          "id": "n3",
-          "type": "text",
-          "title": "Issue with the current product",
-          "copy": "The founding team had deep science credibility but no design foundation. There was no visual language, no component library, and no defined user experience. The product needed to feel medically trustworthy without being cold — a rare balance in health tech. At the same time, the team was moving fast toward a seed fundraise, meaning a polished, demoable product was urgent.",
-          "muted": false
-        },
-        {
-          "id": "n5",
-          "type": "image",
-          "wide": true,
-          "columns": 1,
-          "src": "/uploads/website-mskrbixr.png"
-        },
-        {
-          "id": "n6",
-          "type": "image",
-          "wide": true,
-          "columns": 1,
-          "src": "/uploads/ai-mskrbmqc.png"
-        },
-        {
-          "id": "n7",
-          "type": "text",
-          "title": "Design system, AI-accelerated",
-          "copy": "I built a design system end-to-end using AI-assisted workflows — leveraging Claude and Figma to accelerate token generation, component scaffolding, and documentation. This cut system buildout time by roughly 60% without sacrificing quality or coherence.",
-          "muted": false
-        },
-        {
-          "id": "n10",
-          "type": "image",
-          "wide": true,
-          "columns": 1,
-          "src": "/uploads/techcrunch-mskrc7l5.png"
-        },
-        {
-          "id": "n9",
-          "type": "text",
-          "copy": "Featured in TechCrunch's Top 200 Disrupt startups. Secured $100K in pre-seed funding shortly after the product demo launched.",
-          "muted": true
+          "src": "/uploads/lookbook-muw9oph7.png"
         }
       ]
+    },
+    {
+      "slug": "watsonx",
+      "product": "IBM",
+      "year": "2026",
+      "status": "watsonx.data",
+      "statusColor": "#0072f5",
+      "role": "Design Engineer",
+      "url": "https://IBM.com",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": false,
+          "columns": 1,
+          "src": "/uploads/ibmlogo-muw9ra5j.png"
+        }
+      ]
+    },
+    {
+      "slug": "portfolio",
+      "product": "Portfolio",
+      "year": "2026",
+      "status": "Computer",
+      "statusColor": "#0072f5",
+      "url": "https://trung-os-no-cover.vercel.app/",
+      "embed": true,
+      "role": "Design Engineer",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": false,
+          "columns": 1,
+          "src": "/uploads/computer-muwa02e7.png"
+        }
+      ]
+    }
+  ],
+  "exploration": [
+    {
+      "id": "e1",
+      "title": "",
+      "src": "/uploads/screen-recording-2026-08-13-at-7-28-58-p-mssd1vp9.mov",
+      "alt": "",
+      "kind": "video"
+    },
+    {
+      "id": "e2",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e3",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e4",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e5",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e6",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e7",
+      "title": "",
+      "alt": "",
+      "kind": "image"
+    },
+    {
+      "id": "e8",
+      "title": "",
+      "alt": "",
+      "kind": "image"
     }
   ]
 }

@@ -6,13 +6,18 @@
 
 :root {
   --duration-quick: 150ms;
+  --text-swap-dur: 150ms;
+  --text-swap-translate-y: 4px;
+  --text-swap-blur: 2px;
+  --text-swap-ease: ease-in-out;
   --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --letter-send-dur: 1550ms;
   --toggle-dur: 350ms;
   --toggle-travel: 14.66px;
   --toggle-ov1: 1px;
   --toggle-ov2: 0px;
   --toggle-track: 0ms;
-  --toggle-ease: cubic-bezier(0.34, 1.35, 0.64, 1);
+  --toggle-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .t-toggle { transition: background var(--toggle-track) var(--toggle-ease); }
@@ -467,10 +472,13 @@
   opacity: 1;
 }
 
-.letter-overlay.is-closing .letter-backdrop,
-.letter-overlay.is-sending .letter-backdrop {
+.letter-overlay.is-closing .letter-backdrop {
   opacity: 0;
   transition-duration: var(--modal-close-dur);
+}
+
+.letter-overlay.is-sending .letter-backdrop {
+  animation: letter-backdrop-send var(--letter-send-dur) linear both;
 }
 
 .letter-dialog {
@@ -480,6 +488,20 @@
 
 .letter-form {
   position: relative;
+}
+
+.letter-flight-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 210 / 297;
+  transform-style: preserve-3d;
+  perspective: 900px;
+  will-change: transform, opacity;
+}
+
+.letter-flight-stage.is-sending {
+  animation: letter-send-flight var(--letter-send-dur) var(--ease-smooth-out)
+    forwards;
 }
 
 .letter-paper {
@@ -530,6 +552,14 @@
   transform: rotate(-0.18deg);
   transform-origin: 50% 12%;
   will-change: transform, opacity, filter;
+}
+
+.letter-paper-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
 }
 
 .letter-paper::after {
@@ -756,42 +786,268 @@
   color: #fff;
 }
 
-@keyframes letter-send-flight {
-  0% {
+.letter-plane-model {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 14px rgb(31 28 22 / 0.18));
+  transform: translate3d(0, 1%, 0) rotate(0) scale(0.92);
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+}
+
+.letter-plane-panel {
+  stroke: rgb(70 57 38 / 0.13);
+  stroke-linejoin: round;
+  stroke-width: 0.7;
+  transform-box: fill-box;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.letter-plane-panel-top {
+  transform: scaleY(3.45);
+  transform-origin: 50% 100%;
+}
+
+.letter-plane-panel-bottom {
+  transform: scaleY(3.45);
+  transform-origin: 50% 0%;
+}
+
+.letter-plane-panel-inner-top {
+  fill: #f8f4e9;
+  transform: scaleY(2.5);
+  transform-origin: 50% 100%;
+}
+
+.letter-plane-panel-inner-bottom {
+  fill: #e9e3d7;
+  transform: scaleY(2.5);
+  transform-origin: 50% 0%;
+}
+
+.letter-plane-crease {
+  fill: none;
+  stroke: rgb(70 57 38 / 0.2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 0.8;
+  opacity: 0;
+  stroke-dasharray: 420;
+  stroke-dashoffset: 420;
+}
+
+.letter-flight-stage.is-sending .letter-plane-model {
+  animation: letter-plane-form var(--letter-send-dur) var(--ease-smooth-out)
+    forwards;
+}
+
+.letter-flight-stage.is-sending .letter-plane-panel-top {
+  animation: letter-fold-panel-top var(--letter-send-dur)
+    var(--ease-smooth-out) forwards;
+}
+
+.letter-flight-stage.is-sending .letter-plane-panel-bottom {
+  animation: letter-fold-panel-bottom var(--letter-send-dur)
+    var(--ease-smooth-out) forwards;
+}
+
+.letter-flight-stage.is-sending .letter-plane-panel-inner-top {
+  animation: letter-fold-panel-inner-top var(--letter-send-dur)
+    var(--ease-smooth-out) forwards;
+}
+
+.letter-flight-stage.is-sending .letter-plane-panel-inner-bottom {
+  animation: letter-fold-panel-inner-bottom var(--letter-send-dur)
+    var(--ease-smooth-out) forwards;
+}
+
+.letter-flight-stage.is-sending .letter-plane-crease {
+  animation: letter-plane-crease-in var(--letter-send-dur) linear forwards;
+}
+
+@keyframes letter-backdrop-send {
+  0%,
+  72% {
     opacity: 1;
-    transform: translate3d(0, 0, 0) rotate(-0.18deg) scale(1);
-    filter: blur(0);
-  }
-  14% {
-    opacity: 1;
-    transform: translate3d(0, -8%, 0) rotate(-0.2deg) scaleX(0.98)
-      scaleY(1.16);
-    filter: blur(0);
-  }
-  34% {
-    opacity: 1;
-    transform: translate3d(0, -38%, 0) rotate(-0.55deg) scaleX(0.82)
-      scaleY(1.2);
-    filter: blur(0.5px);
-  }
-  64% {
-    opacity: 0.78;
-    transform: translate3d(0, -102%, 0) rotate(-1.25deg) scaleX(0.3)
-      scaleY(0.9);
-    filter: blur(1.5px);
   }
   100% {
     opacity: 0;
-    transform: translate3d(0, -178%, 0) rotate(-1.8deg) scaleX(0.04)
-      scaleY(0.38);
-    filter: blur(4px);
+  }
+}
+
+@keyframes letter-send-flight {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0) scale(1);
+  }
+  8% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) rotate(0) scale(1);
+  }
+  59% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) rotate(-2deg) scale(1);
+  }
+  64% {
+    opacity: 1;
+    transform: translate3d(-1.5%, 1%, 0) rotate(-5deg) scale(0.98);
+  }
+  74% {
+    opacity: 1;
+    transform: translate3d(9vw, -6vh, 0) rotate(-10deg) scale(0.86);
+  }
+  86% {
+    opacity: 0.92;
+    transform: translate3d(30vw, -30vh, 0) rotate(-16deg) scale(0.64);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(50vw + 100%), calc(-50vh - 100%), 0)
+      rotate(-21deg) scale(0.44);
   }
 }
 
 .letter-paper.is-sending {
   pointer-events: none;
-  transform-origin: 50% 100%;
-  animation: letter-send-flight 700ms linear forwards;
+  transform-origin: 50% 50%;
+  animation: letter-sheet-fold var(--letter-send-dur) var(--ease-smooth-out)
+    forwards;
+}
+
+.letter-paper.is-sending .letter-paper-content {
+  animation: letter-writing-fade var(--letter-send-dur) linear forwards;
+}
+
+@keyframes letter-writing-fade {
+  0%,
+  8% {
+    opacity: 1;
+  }
+  23% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes letter-sheet-fold {
+  0%,
+  8% {
+    opacity: 1;
+    transform: rotate(-0.18deg) scale(1);
+  }
+  23% {
+    opacity: 1;
+    transform: rotate(-0.18deg) scale3d(0.99, 0.98, 1);
+  }
+  46% {
+    opacity: 0.5;
+    transform: translate3d(0, -2%, 0) rotate(-1.5deg) scale3d(0.92, 0.78, 1);
+  }
+  54%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, -3%, 0) rotate(-4deg) scale3d(0.84, 0.42, 1);
+  }
+}
+
+@keyframes letter-plane-form {
+  0%,
+  20% {
+    opacity: 0;
+    transform: translate3d(0, 1%, 0) rotate(0) scale(0.92);
+  }
+  27% {
+    opacity: 0.2;
+  }
+  46% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-3deg) scale(0.9);
+  }
+  54% {
+    transform: translate3d(0, -1%, 0) rotate(-9deg) scale(0.83);
+  }
+  59%,
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-7deg) scale(0.86);
+  }
+}
+
+@keyframes letter-fold-panel-top {
+  0%,
+  20% {
+    transform: scaleY(3.45);
+  }
+  48% {
+    transform: scaleY(0.94);
+  }
+  56%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes letter-fold-panel-bottom {
+  0%,
+  24% {
+    transform: scaleY(3.45);
+  }
+  50% {
+    transform: scaleY(0.94);
+  }
+  57%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes letter-fold-panel-inner-top {
+  0%,
+  30% {
+    transform: scaleY(2.5);
+  }
+  52% {
+    transform: scaleY(0.9);
+  }
+  58%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes letter-fold-panel-inner-bottom {
+  0%,
+  34% {
+    transform: scaleY(2.5);
+  }
+  54% {
+    transform: scaleY(0.9);
+  }
+  59%,
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes letter-plane-crease-in {
+  0%,
+  46% {
+    opacity: 0;
+    stroke-dashoffset: 420;
+  }
+  59%,
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
 }
 
 .letter-form.is-sending .letter-send,
@@ -944,12 +1200,37 @@
     transform: none;
   }
 
+  .letter-overlay.is-sending .letter-backdrop {
+    animation: letter-backdrop-send-reduced 80ms linear forwards;
+  }
+
+  .letter-flight-stage.is-sending {
+    animation: letter-send-flight-reduced 80ms linear forwards;
+  }
+
   .letter-paper.is-sending {
-    animation: none;
+    animation: none !important;
     opacity: 0;
   }
 
+  .letter-paper.is-sending .letter-paper-content,
+  .letter-flight-stage.is-sending .letter-plane-model,
+  .letter-flight-stage.is-sending .letter-plane-panel,
+  .letter-flight-stage.is-sending .letter-plane-crease {
+    animation: none !important;
+  }
+
+  .letter-plane-model { opacity: 0 !important; }
+
   .t-input { animation: none !important; transform: none !important; }
+}
+
+@keyframes letter-send-flight-reduced {
+  to { opacity: 0; }
+}
+
+@keyframes letter-backdrop-send-reduced {
+  to { opacity: 0; }
 }
 
 .dark {
@@ -1269,15 +1550,49 @@
   }
 }
 
-.exploration-grid-tile {
+.exploration-overlay-backdrop {
   opacity: 0;
+  transition:
+    opacity var(--modal-open-dur) var(--modal-ease);
+}
+
+.exploration-overlay.is-open .exploration-overlay-backdrop {
+  opacity: 1;
+}
+
+.exploration-overlay.is-closing .exploration-overlay-backdrop {
+  opacity: 0;
+  transition-duration: var(--modal-close-dur);
+}
+
+.exploration-overlay-frame {
+  transform-origin: center;
+  transition:
+    transform var(--modal-open-dur) var(--modal-ease);
+  will-change: transform;
+}
+
+.exploration-overlay.is-closing .exploration-overlay-frame {
+  transition-duration: var(--modal-close-dur);
+}
+
+.exploration-grid-tile {
+  opacity: 1;
   animation: exploration-tile-enter 420ms cubic-bezier(0.16, 1, 0.3, 1)
-    forwards;
+    backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .exploration-overlay-backdrop,
+  .exploration-overlay-frame {
+    transition: none !important;
+  }
+
   .exploration-grid-tile {
     opacity: 1;
     animation: none;
   }
 }
+
+/* Text selection uses the soundboard knob orange. */
+::selection { background: rgb(255 56 0 / .22); color: inherit; }

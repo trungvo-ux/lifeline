@@ -1,11 +1,13 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { ArrowDown, ArrowUp, Plus, Trash2, Upload, X } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
+import { getFrames, getSlides } from "@/components/study-story"
 import {
   DEFAULT_STATUS_COLOR,
   toSlug,
+  type ExplorationItem,
   type Study,
   type StudyNode,
 } from "@/lib/study"
@@ -34,67 +36,69 @@ function nextNodeId(nodes: StudyNode[]) {
   return `n${i}`
 }
 
-/** The schematic on the right: plates as blocks, text as rules. */
+function nextExplorationId(items: ExplorationItem[]) {
+  const used = new Set(items.map((item) => item.id))
+  let index = items.length + 1
+  while (used.has(`e${index}`)) index += 1
+  return `e${index}`
+}
+
+/** Mini slides mirroring /study: a cover, then one slide per image with the copy that follows it. */
 function StackPreview({ study }: { study: Study }) {
+  const frames = getFrames(study)
+  const name = study.client || study.product || "Untitled"
   return (
     <div className="sticky top-6 rounded-lg border border-black/10 p-3 dark:border-white/10">
       <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.08em] text-gray-600 dark:text-zinc-400">
-        Stack
+        Slides
       </p>
 
-      <div className="flex flex-col items-center gap-[6px] rounded bg-black/[0.02] p-3 dark:bg-white/5">
-        <div className="flex w-full items-center justify-between">
-          <span className="text-[10px] font-medium text-black dark:text-white">
-            {study.product || "Untitled"}
-          </span>
-          {study.status ? (
-            <span
-              className="rounded-full px-1.5 py-0.5 text-[8px] font-medium text-white"
-              style={{ backgroundColor: study.statusColor }}
-            >
-              {study.status}
-            </span>
-          ) : null}
-        </div>
-
-        {study.nodes.map((node) =>
-          node.type === "image" ? (
-            <div
-              key={node.id}
-              className={`flex gap-[4px] ${node.wide ? "w-[115%]" : "w-full"}`}
-              title={node.wide ? "750px plate" : "Plate"}
-            >
-              {(node.columns === 2 ? [node.src, node.srcB] : [node.src]).map(
-                (src, i) => (
-                  <div
-                    key={i}
-                    className="h-[26px] flex-1 overflow-hidden rounded-[2px] bg-study-surface"
-                  >
-                    {src ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={src}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : null}
-                  </div>
-                ),
-              )}
-            </div>
-          ) : (
-            <div key={node.id} className="w-full py-[2px]">
-              {node.muted ? null : (
-                <div className="mb-[3px] h-[3px] w-1/2 rounded-full bg-black/50 dark:bg-white/50" />
-              )}
-              <div className="h-[3px] w-3/4 rounded-full bg-black/20 dark:bg-white/20" />
-            </div>
-          ),
-        )}
-
-        {study.nodes.length === 0 ? (
-          <p className="py-4 text-[11px] text-gray-500 dark:text-zinc-400">No nodes yet.</p>
+      <div className="flex flex-col gap-2">
+        {frames.length === 0 ? (
+          <p className="py-4 text-center text-[11px] text-gray-500 dark:text-zinc-400">Add an image to start a slide.</p>
         ) : null}
+        {[null, ...getSlides(frames)].map((frame, index) => {
+          const image = frame ? frame.image : frames[0]?.image
+          const showImage = index !== 1
+          return (
+            <div
+              key={frame?.image.id ?? "cover"}
+              className="relative flex aspect-[16/10] items-center gap-2 rounded-[3px] border border-black/10 bg-white p-2 dark:border-white/10 dark:bg-zinc-950"
+            >
+              <span className="absolute left-1.5 top-1 text-[8px] text-gray-400">{frame ? `Slide ${index}` : "Cover"}</span>
+              <div className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                {frame ? (
+                  <>
+                    <p className="truncate text-[6px] text-gray-500 dark:text-zinc-400">{name} {study.status}</p>
+                    {frame.copy.map((node) => (
+                      <div key={node.id}>
+                        {node.title ? <p className="truncate text-[7px] font-medium text-black dark:text-white">{node.title}</p> : null}
+                        <div className="mt-[2px] h-[2px] w-full rounded-full bg-black/15 dark:bg-white/20" />
+                        <div className="mt-[2px] h-[2px] w-2/3 rounded-full bg-black/15 dark:bg-white/20" />
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <dl className="text-[7px] leading-[1.3]">
+                    {[[name, study.status], ["Role", study.role || "Product Designer"], ["Timeline", study.year]].map(([dt, dd]) => (
+                      <div key={dt} className="flex gap-1"><dt className="font-medium text-black dark:text-white">{dt}</dt><dd className="truncate text-gray-500 dark:text-zinc-400">{dd}</dd></div>
+                    ))}
+                  </dl>
+                )}
+              </div>
+              {showImage && image ? (
+                <div className="flex aspect-[4/3] w-[58%] shrink-0 gap-[2px] overflow-hidden rounded-[2px] bg-study-surface">
+                  {(image.columns === 2 ? [image.src, image.srcB] : [image.src]).map((src, i) =>
+                    src ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img key={i} src={src} alt="" className="h-full min-w-0 flex-1 object-cover" />
+                    ) : <div key={i} className="flex-1" />,
+                  )}
+                </div>
+              ) : null}
+            </div>
+          )
+        })}
       </div>
 
       <a
@@ -191,8 +195,252 @@ function ImageSlot({
   )
 }
 
+function ExplorationMediaSlot({
+  item,
+  onChange,
+}: {
+  item: ExplorationItem
+  onChange: (patch: Partial<ExplorationItem>) => void
+}) {
+  const input = useRef<HTMLInputElement>(null)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const upload = async (file: File) => {
+    setBusy(true)
+    setError(null)
+    try {
+      const body = new FormData()
+      body.append("file", file)
+      const response = await fetch("/api/studio/upload", { method: "POST", body })
+      const json = await response.json()
+      if (!response.ok) throw new Error(json.error)
+      onChange({ src: json.src, kind: json.kind === "video" ? "video" : "image" })
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "Upload failed")
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <div className="grid h-[72px] w-[96px] shrink-0 place-items-center overflow-hidden rounded bg-study-surface ring-1 ring-black/10 dark:ring-white/10">
+        {item.src ? (
+          item.kind === "video" ? (
+            <video
+              src={item.src}
+              muted
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={item.src} alt="" className="h-full w-full object-cover" />
+          )
+        ) : (
+          <span className="text-[10px] uppercase tracking-[0.08em] text-gray-500 dark:text-zinc-500">
+            Empty
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1 space-y-2">
+        <div className="flex gap-2">
+          <input
+            className={FIELD}
+            placeholder="/uploads/… or a media URL"
+            value={item.src ?? ""}
+            onChange={(event) =>
+              onChange({ src: event.target.value || undefined })
+            }
+          />
+          <select
+            aria-label="Media type"
+            className="w-[92px] shrink-0 rounded-md border border-black/15 bg-white px-2 py-1.5 text-[13px] text-black outline-none focus:border-black/40 dark:border-white/15 dark:bg-zinc-950 dark:text-white dark:focus:border-white/40"
+            value={item.kind}
+            onChange={(event) =>
+              onChange({ kind: event.target.value === "video" ? "video" : "image" })
+            }
+          >
+            <option value="image">Image</option>
+            <option value="video">Video</option>
+          </select>
+        </div>
+        {error ? (
+          <p className="text-[11px] text-red-600 dark:text-red-400">{error}</p>
+        ) : null}
+      </div>
+
+      <input
+        ref={input}
+        type="file"
+        accept="image/*,video/mp4,video/webm,video/quicktime"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0]
+          if (file) void upload(file)
+          event.target.value = ""
+        }}
+      />
+      <button
+        type="button"
+        className={BUTTON}
+        onClick={() => input.current?.click()}
+        disabled={busy}
+      >
+        <Upload className="h-3.5 w-3.5" />
+        {busy ? "…" : "Upload"}
+      </button>
+      {item.src ? (
+        <button
+          type="button"
+          className={BUTTON}
+          onClick={() => onChange({ src: undefined })}
+          aria-label={`Clear exploration frame ${item.id}`}
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      ) : null}
+    </div>
+  )
+}
+
+function ExplorationEditor({
+  items,
+  onChange,
+  onSave,
+  saving,
+}: {
+  items: ExplorationItem[]
+  onChange: (items: ExplorationItem[]) => void
+  onSave: () => void
+  saving: boolean
+}) {
+  const update = (index: number, patch: Partial<ExplorationItem>) =>
+    onChange(items.map((item, itemIndex) =>
+      itemIndex === index ? { ...item, ...patch } : item,
+    ))
+
+  const move = (index: number, by: number) => {
+    const target = index + by
+    if (target < 0 || target >= items.length) return
+    const next = [...items]
+    ;[next[index], next[target]] = [next[target], next[index]]
+    onChange(next)
+  }
+
+  return (
+    <section className="mb-10 rounded-xl border border-black/10 p-4 dark:border-white/10">
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-[16px] font-medium">Exploration</h2>
+          <p className="mt-1 text-[12px] text-gray-600 dark:text-zinc-400">
+            Media frames on the homepage. Videos play with controls in the overlay.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onSave}
+          disabled={saving}
+          className="rounded-md bg-black px-3 py-1.5 text-[13px] font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-40 dark:bg-white dark:text-black"
+        >
+          {saving ? "Saving…" : "Save exploration"}
+        </button>
+      </div>
+
+      <ol className="grid gap-3 xl:grid-cols-2">
+        {items.map((item, index) => (
+          <li
+            key={item.id}
+            className="rounded-lg border border-black/10 p-3 dark:border-white/10"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-gray-600 dark:text-zinc-400">
+                Frame {index + 1} · {item.id}
+              </span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  className={BUTTON}
+                  onClick={() => move(index, -1)}
+                  disabled={index === 0}
+                  aria-label={`Move frame ${index + 1} up`}
+                >
+                  <ArrowUp className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  className={BUTTON}
+                  onClick={() => move(index, 1)}
+                  disabled={index === items.length - 1}
+                  aria-label={`Move frame ${index + 1} down`}
+                >
+                  <ArrowDown className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  className={BUTTON}
+                  onClick={() => onChange(items.filter((_, itemIndex) => itemIndex !== index))}
+                  aria-label={`Delete frame ${index + 1}`}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <ExplorationMediaSlot
+                item={item}
+                onChange={(patch) => update(index, patch)}
+              />
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  className={FIELD}
+                  placeholder="Title / overlay label"
+                  value={item.title}
+                  onChange={(event) => update(index, { title: event.target.value })}
+                />
+                <input
+                  className={FIELD}
+                  placeholder="Alt text"
+                  value={item.alt}
+                  onChange={(event) => update(index, { alt: event.target.value })}
+                />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <button
+        type="button"
+        className={`${BUTTON} mt-3`}
+        onClick={() =>
+          onChange([
+            ...items,
+            {
+              id: nextExplorationId(items),
+              title: "",
+              alt: "",
+              kind: "image",
+            },
+          ])
+        }
+      >
+        <Plus className="h-3.5 w-3.5" /> New frame
+      </button>
+    </section>
+  )
+}
+
 export default function Studio() {
   const [studies, setStudies] = useState<Study[] | null>(null)
+  const [exploration, setExploration] = useState<ExplorationItem[] | null>(null)
+  const [workspace, setWorkspace] = useState<"case-studies" | "exploration">(
+    "case-studies",
+  )
   const [active, setActive] = useState(0)
   const [status, setStatus] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -200,11 +448,14 @@ export default function Studio() {
   useEffect(() => {
     fetch("/api/studio")
       .then((r) => r.json())
-      .then((d) => setStudies(d.studies))
+      .then((data) => {
+        setStudies(data.studies)
+        setExploration(data.exploration ?? [])
+      })
       .catch(() => setStatus("Could not load content."))
   }, [])
 
-  if (!studies) {
+  if (!studies || !exploration) {
     return (
       <main className="mx-auto max-w-[1100px] px-6 py-16 text-[14px]">
         <p className="text-gray-600 dark:text-zinc-400">{status ?? "Loading…"}</p>
@@ -237,7 +488,7 @@ export default function Studio() {
       nodes: [
         ...study.nodes,
         type === "image"
-          ? { id: nextNodeId(study.nodes), type: "image", wide: true, columns: 1 }
+          ? { id: nextNodeId(study.nodes), type: "image", columns: 1 }
           : {
               id: nextNodeId(study.nodes),
               type: "text",
@@ -281,7 +532,7 @@ export default function Studio() {
       const response = await fetch("/api/studio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studies }),
+        body: JSON.stringify({ studies, exploration }),
       })
       const body = await response.json()
       setStatus(response.ok ? "Saved." : `Error: ${body.error}`)
@@ -304,8 +555,69 @@ export default function Studio() {
         <ThemeSwitcher />
       </header>
 
-      {/* Study switcher */}
-      <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-black/10 pb-4 dark:border-white/10">
+      <nav
+        aria-label="Studio sections"
+        className="mb-6 border-b border-black/10 dark:border-white/10"
+      >
+        <div className="flex gap-6" role="tablist" aria-label="Studio content">
+          {(
+            [
+              ["case-studies", "Case studies"],
+              ["exploration", "Exploration"],
+            ] as const
+          ).map(([id, label]) => {
+            const selected = workspace === id
+
+            return (
+              <button
+                key={id}
+                type="button"
+                role="tab"
+                id={`studio-tab-${id}`}
+                aria-selected={selected}
+                aria-controls={`studio-panel-${id}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => setWorkspace(id)}
+                className={`relative pb-3 text-[14px] font-medium transition-colors after:absolute after:inset-x-0 after:bottom-[-1px] after:h-px after:bg-current after:transition-transform ${
+                  selected
+                    ? "text-black after:scale-x-100 dark:text-white"
+                    : "text-gray-500 after:scale-x-0 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                }`}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+      </nav>
+
+      {workspace === "exploration" ? (
+        <div
+          role="tabpanel"
+          id="studio-panel-exploration"
+          aria-labelledby="studio-tab-exploration"
+        >
+          <ExplorationEditor
+            items={exploration}
+            onChange={setExploration}
+            onSave={save}
+            saving={saving}
+          />
+          {status ? (
+            <p className="mt-3 text-[13px] text-gray-600 dark:text-zinc-400">
+              {status}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div
+          role="tabpanel"
+          id="studio-panel-case-studies"
+          aria-labelledby="studio-tab-case-studies"
+        >
+
+          {/* Study switcher */}
+          <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-black/10 pb-4 dark:border-white/10">
         {studies.map((s, i) => (
           <button
             key={s.slug}
@@ -331,9 +643,9 @@ export default function Studio() {
         >
           <Trash2 className="h-3.5 w-3.5" /> Delete study
         </button>
-      </div>
+          </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
+          <div className="grid gap-6 lg:grid-cols-[1fr_260px]">
         <div>
           <section className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <label className="flex flex-col gap-1">
@@ -361,35 +673,77 @@ export default function Studio() {
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[12px] text-gray-600 dark:text-zinc-400">
-                Badge (empty hides)
+              <span className="text-[12px] text-gray-600 dark:text-zinc-400">Project</span>
+              <input
+                className={FIELD}
+                placeholder="Redesign"
+                value={study.status ?? ""}
+                onChange={(e) => updateStudy({ status: e.target.value })}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[12px] text-gray-600 dark:text-zinc-400">Client (cover title)</span>
+              <input
+                className={FIELD}
+                placeholder="Defaults to product"
+                value={study.client ?? ""}
+                onChange={(e) => updateStudy({ client: e.target.value })}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[12px] text-gray-600 dark:text-zinc-400">Role</span>
+              <input
+                className={FIELD}
+                placeholder="Product Designer"
+                value={study.role ?? ""}
+                onChange={(e) => updateStudy({ role: e.target.value })}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[12px] text-gray-600 dark:text-zinc-400">Website</span>
+              <input
+                className={FIELD}
+                placeholder="https://"
+                value={study.url ?? ""}
+                onChange={(e) => updateStudy({ url: e.target.value })}
+              />
+              <span className="flex items-center gap-2 text-[12px]">
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5"
+                  checked={Boolean(study.embed)}
+                  onChange={(e) => updateStudy({ embed: e.target.checked })}
+                />
+                Open in overlay
               </span>
-              <div className="flex items-center gap-2">
-                <input
-                  className={FIELD}
-                  value={study.status}
-                  onChange={(e) => updateStudy({ status: e.target.value })}
-                />
-                <input
-                  type="color"
-                  aria-label="Badge colour"
-                  className="h-[32px] w-[32px] shrink-0 cursor-pointer rounded-md border border-black/15 bg-white p-0.5 dark:border-white/15 dark:bg-zinc-950"
-                  value={study.statusColor}
-                  onChange={(e) => updateStudy({ statusColor: e.target.value })}
-                />
-              </div>
             </label>
           </section>
 
           <ol className="flex flex-col gap-3">
-            {study.nodes.map((node, index) => (
+            {study.nodes.map((node, index) => {
+              const slide = study.nodes.slice(0, index + 1).filter((n) => n.type === "image").length
+              return (
+              <Fragment key={node.id}>
+              {node.type === "image" ? (
+                <li className={`${slide > 1 ? "mt-5" : ""} flex items-baseline gap-2 text-[13px] font-medium`}>
+                  Slide {slide}
+                  <span className="text-[12px] font-normal text-gray-500 dark:text-zinc-400">
+                    {slide === 1 ? "Image shows on the cover; copy below shows on the next slide" : "Image + the copy below it"}
+                  </span>
+                </li>
+              ) : null}
               <li
-                key={node.id}
-                className="rounded-lg border border-black/10 p-3 transition-colors hover:border-black/20 dark:border-white/10 dark:hover:border-white/20"
+                className={`rounded-lg border p-3 transition-colors ${
+                  node.type === "text"
+                    ? slide === 0
+                      ? "ml-6 border-dashed border-red-400/60"
+                      : "ml-6 border-black/10 hover:border-black/20 dark:border-white/10 dark:hover:border-white/20"
+                    : "border-black/10 hover:border-black/20 dark:border-white/10 dark:hover:border-white/20"
+                }`}
               >
                 <div className="mb-2 flex items-center justify-between">
                   <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-gray-600 dark:text-zinc-400">
-                    {node.type} · {node.id}
+                    {node.type === "image" ? `Slide ${slide} image` : slide === 0 ? "Hidden — add an image above" : `Slide ${slide} copy`}
                   </span>
                   <div className="flex gap-1.5">
                     <button
@@ -462,17 +816,6 @@ export default function Studio() {
                         <input
                           type="checkbox"
                           className="h-3.5 w-3.5"
-                          checked={Boolean(node.wide)}
-                          onChange={(e) =>
-                            updateNode(node.id, { wide: e.target.checked })
-                          }
-                        />
-                        Wide (750px)
-                      </label>
-                      <label className="flex items-center gap-2 text-[13px]">
-                        <input
-                          type="checkbox"
-                          className="h-3.5 w-3.5"
                           checked={node.columns === 2}
                           onChange={(e) =>
                             updateNode(node.id, {
@@ -508,7 +851,9 @@ export default function Studio() {
                   </div>
                 )}
               </li>
-            ))}
+              </Fragment>
+              )
+            })}
           </ol>
 
           <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -545,7 +890,9 @@ export default function Studio() {
         <aside>
           <StackPreview study={study} />
         </aside>
-      </div>
+          </div>
+        </div>
+      )}
     </main>
   )
 }

@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises"
 import { NextResponse } from "next/server"
 import { parseStudyLibrary } from "@/lib/study"
-import { getStudies, STUDIES_PATH } from "@/lib/study-server"
+import { getStudyLibrary, STUDIES_PATH } from "@/lib/study-server"
 
 /**
  * The studio's save endpoint. It writes content/studies.json on the local
@@ -16,7 +16,7 @@ export async function GET() {
     return new NextResponse(null, { status: 404 })
   }
 
-  return NextResponse.json({ studies: await getStudies(), editable: isEditable })
+  return NextResponse.json({ ...(await getStudyLibrary()), editable: isEditable })
 }
 
 export async function POST(request: Request) {

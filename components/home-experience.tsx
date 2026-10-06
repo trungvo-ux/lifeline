@@ -1,64 +1,56 @@
 "use client"
 
-import { useState } from "react"
-import { AvailabilityLetter } from "@/components/availability-letter"
-import { DemoCompanyIcons } from "@/components/demo-company-icons"
-import { ExplorationGrid } from "@/components/exploration-grid"
-import { ExplorationNav } from "@/components/exploration-nav"
-import { Lifeline } from "@/components/lifeline"
-import { LifelineStage } from "@/components/lifeline-shell"
-import { ScrollToTop } from "@/components/scroll-to-top"
-import { SITE_GUTTER } from "@/components/site-header"
-import { trungvoLifeline } from "@/lib/trungvo"
-
-const COLUMN = "max-w-[600px] text-left lg:mx-auto"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { Soundboard } from "@/components/soundboard"
+import { PortfolioNav } from "@/components/portfolio-nav"
+import "./home-experience.css"
 
 export function HomeExperience() {
-  const [showExploration, setShowExploration] = useState(false)
+  const [shown, setShown] = useState(false)
+  const [boardRevealed, setBoardRevealed] = useState(false)
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setShown(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const frame = requestAnimationFrame(() => setBoardRevealed(true))
+      return () => cancelAnimationFrame(frame)
+    }
+    const timer = window.setTimeout(() => setBoardRevealed(true), 1000)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   return (
-    <>
-      <section
-        className={`shrink-0 pb-12 text-[14px] lg:pb-[100px] ${SITE_GUTTER}`}
-      >
-        <div className={`reveal-up ${COLUMN}`}>
-          <AvailabilityLetter />
-
-          <p className="mt-6 text-black dark:text-white">
-            I&rsquo;m interested in doing micro-interactions &amp; animations
-          </p>
-
-          <p className="mt-4 text-gray-700 dark:text-zinc-400">
-            I design systems for complex data work, currently at IBM on
-            watsonx.data, focusing on how teams query, visualize, and act on
-            data at scale. I&rsquo;m curious about how AI can enhance humanity
-            and how to implement safeguards for it.
-          </p>
-
-          <ExplorationNav
-            explorationActive={showExploration}
-            onExplorationClick={() => setShowExploration((active) => !active)}
-          />
-        </div>
-      </section>
-
-      {showExploration ? (
-        <main className="min-h-0 flex-1 pb-12 lg:overflow-y-auto">
-          <ExplorationGrid />
+    <div className="home-page">
+      <PortfolioNav active="home" />
+        <main className="home-hero">
+          <div className="home-soundboard-reveal t-panel-slide" data-open={shown} data-finished={boardRevealed}>
+            <div className="home-soundboard-blueprint" aria-hidden="true">
+              <div className="home-soundboard-blueprint-grid">
+                <span className="home-blueprint-cell home-blueprint-speaker"><i /></span>
+                <span className="home-blueprint-cell home-blueprint-display" />
+                <span className="home-blueprint-cell home-blueprint-knob"><i /></span>
+                {Array.from({ length: 16 }, (_, index) => <span className="home-blueprint-cell home-blueprint-pad" style={{ animationDelay: `${180 + index * 25}ms` }} key={index}><i /></span>)}
+              </div>
+            </div>
+            <div className="home-soundboard-finished" aria-hidden={!boardRevealed} inert={!boardRevealed}>
+              <Soundboard enabled={boardRevealed} />
+            </div>
+          </div>
+          <div className={`home-hero-copy t-stagger ${shown ? "is-shown" : ""}`}>
+            <h1 className="t-stagger-line t-stagger-line--1">Trung is a Product Designer at <a href="https://www.ibm.com/" target="_blank" rel="noopener noreferrer">IBM</a></h1>
+            <nav className="home-social-links t-stagger-line t-stagger-line--2" aria-label="Social links">
+              <a href="https://www.linkedin.com/in/trung--vo" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <span className="home-social-dot" aria-hidden="true" />
+              <a href="https://x.com/trungvo23" target="_blank" rel="noopener noreferrer">X</a>
+              <span className="home-social-dot" aria-hidden="true" />
+              <Link href="/email">Email</Link>
+            </nav>
+          </div>
         </main>
-      ) : (
-        <>
-          <DemoCompanyIcons />
-          <LifelineStage className="reveal-up-last pt-0">
-            <Lifeline
-              markers={trungvoLifeline.markers}
-              title={trungvoLifeline.name}
-              className="h-full"
-            />
-          </LifelineStage>
-          <ScrollToTop afterLabel="Aug 2025" />
-        </>
-      )}
-    </>
+    </div>
   )
 }

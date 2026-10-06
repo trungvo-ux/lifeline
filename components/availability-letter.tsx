@@ -1,10 +1,12 @@
 "use client"
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react"
+import "@/app/availability-letter.css"
 import { createPortal } from "react-dom"
+import { X } from "lucide-react"
 
 const CLOSE_FALLBACK_MS = 150
-const SEND_MS = 700
+const SEND_FALLBACK_MS = 1_650
 const SESSION_SEND_COUNT_KEY = "portfolio-letter-send-count"
 const SESSION_SEND_LIMIT = 3
 
@@ -58,6 +60,8 @@ export function AvailabilityLetter() {
   const emailInputRef = useRef<HTMLInputElement>(null)
   const emailWrapRef = useRef<HTMLDivElement>(null)
   const sendAudioRef = useRef<HTMLAudioElement>(null)
+  const flightRef = useRef<HTMLDivElement>(null)
+  const sendInFlightRef = useRef(false)
   const timerRef = useRef<number | null>(null)
 
   const clearTimer = useCallback(() => {
@@ -97,8 +101,9 @@ export function AvailabilityLetter() {
 
   async function sendLetter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+
     const letter = message.trim()
-    if (!letter || isSending) return
+    if (!letter || isSending || sendInFlightRef.current) return
 
     const senderEmail = email.trim()
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)
@@ -127,16 +132,8 @@ export function AvailabilityLetter() {
       return
     }
 
-    try {
-      window.sessionStorage.setItem(
-        SESSION_SEND_COUNT_KEY,
-        String(sendCount + 1)
-      )
-    } catch {
-      // Storage can be unavailable in strict privacy modes; sending still works.
-    }
-
     clearTimer()
+    sendInFlightRef.current = true
 
     const sendAudio = sendAudioRef.current
     if (sendAudio) {
@@ -145,46 +142,83 @@ export function AvailabilityLetter() {
       void sendAudio.play().catch(() => undefined)
     }
 
-    setIsSending(true)
-
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches
 
-    timerRef.current = window.setTimeout(
-      () => {
-        void fetch("/api/contact", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            subject: "A note from your portfolio",
-            body: `Dear Trung,\n\n${letter}\n\nSincerely,\n${senderEmail}`,
-            website: "",
-          }),
-        })
-          .then(async (response) => {
-            if (!response.ok) throw new Error("Contact is unavailable")
-            return response.json() as Promise<{ href?: string }>
-          })
-          .then(({ href }) => {
-            if (!href?.startsWith("mailto:")) throw new Error("Invalid contact link")
+    let cancelAnimationWait: () => void = () => undefined
+    const animationDone = new Promise<void>((resolve) => {
+      const flight = flightRef.current
+      let finished = false
 
-            setIsVisible(false)
-            setIsMounted(false)
-            setIsClosing(false)
-            setIsSending(false)
-            setMessage("")
-            setEmail("")
-            setEmailError(false)
-            window.location.href = href
-          })
-          .catch(() => {
-            setIsSending(false)
-            setSpamQuip("Email is unavailable right now. Please try again.")
-          })
-      },
-      reduceMotion ? 80 : SEND_MS
-    )
+      const finish = () => {
+        if (finished) return
+        finished = true
+        flight?.removeEventListener("animationend", onAnimationEnd)
+        if (timerRef.current !== null) {
+          window.clearTimeout(timerRef.current)
+          timerRef.current = null
+        }
+        resolve()
+      }
+
+      const onAnimationEnd = (animationEvent: AnimationEvent) => {
+        if (animationEvent.animationName === "letter-origami-flight") finish()
+      }
+
+      cancelAnimationWait = finish
+      flight?.addEventListener("animationend", onAnimationEnd)
+      timerRef.current = window.setTimeout(
+        finish,
+        reduceMotion
+          ? 80
+          : cssDurationInMs("--letter-send-dur", SEND_FALLBACK_MS) + 100
+      )
+    })
+
+    setIsSending(true)
+
+    try {
+      const contactRequest = fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          subject: "A note from your portfolio",
+          body: `Dear Trung,\n\n${letter}\n\nSincerely,\n${senderEmail}`,
+          website: "",
+        }),
+      }).then(async (response) => {
+        if (!response.ok) throw new Error("Contact is unavailable")
+        return response.json() as Promise<{ href?: string }>
+      })
+
+      const [{ href }] = await Promise.all([contactRequest, animationDone])
+      if (!href?.startsWith("mailto:")) throw new Error("Invalid contact link")
+
+      try {
+        window.sessionStorage.setItem(
+          SESSION_SEND_COUNT_KEY,
+          String(sendCount + 1)
+        )
+      } catch {
+        // Storage can be unavailable in strict privacy modes; sending still works.
+      }
+
+      setIsVisible(false)
+      setIsMounted(false)
+      setIsClosing(false)
+      setIsSending(false)
+      setMessage("")
+      setEmail("")
+      setEmailError(false)
+      window.location.href = href
+    } catch {
+      cancelAnimationWait()
+      setIsSending(false)
+      setSpamQuip("Email is unavailable right now. Please try again.")
+    } finally {
+      sendInFlightRef.current = false
+    }
   }
 
   useEffect(() => {
@@ -267,7 +301,7 @@ export function AvailabilityLetter() {
                 aria-label="Close letter"
                 disabled={isSending}
               >
-                <span aria-hidden="true">×</span>
+                <X className="h-5 w-5 shrink-0" strokeWidth={2} aria-hidden="true" />
               </button>
 
               <form
@@ -275,80 +309,90 @@ export function AvailabilityLetter() {
                 onSubmit={sendLetter}
               >
                 <div
-                  className={`letter-paper ${isSending ? "is-sending" : ""}`}
+                  ref={flightRef}
+                  className={`letter-flight-stage ${
+                    isSending ? "is-sending" : ""
+                  }`}
                 >
-                  <h2 id="letter-title" className="letter-heading">
-                    Dear, Trung
-                  </h2>
-
-                  <label htmlFor="letter-message" className="sr-only">
-                    Your message to Trung
-                  </label>
-                  <textarea
-                    ref={textareaRef}
-                    id="letter-message"
-                    value={message}
-                    onChange={(event) => {
-                      setMessage(event.target.value)
-                    }}
-                    className="letter-message"
-                    placeholder="Write me a note..."
-                    rows={8}
-                    disabled={isSending}
-                  />
-
                   <div
-                    ref={emailWrapRef}
-                    className={`t-input-wrap letter-signature ${
-                      emailError ? "is-error" : ""
-                    }`}
+                    className={`letter-paper ${isSending ? "is-sending" : ""}`}
                   >
-                    <label htmlFor="letter-email" className="letter-signoff">
-                      Sincerely,
-                    </label>
-                    <input
-                      ref={emailInputRef}
-                      id="letter-email"
-                      type="email"
-                      inputMode="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(event) => {
-                        setEmail(event.target.value)
-                        setEmailError(false)
-                      }}
-                      className={`t-input letter-email-field ${
-                        emailError ? "is-error" : ""
-                      }`}
-                      placeholder="your@email.com"
-                      aria-invalid={emailError}
-                      aria-describedby="letter-email-error"
-                      disabled={isSending}
-                    />
-                    <svg
-                      className="t-error-msg letter-email-scribble"
-                      viewBox="0 0 210 16"
-                      preserveAspectRatio="none"
-                      aria-hidden="true"
-                    >
-                      <path d="M2 8 C 20 2, 31 14, 49 7 S 78 3, 95 9 S 124 13, 143 6 S 178 3, 208 9" />
-                      <path d="M5 11 C 29 5, 46 13, 67 8 S 105 4, 125 11 S 165 13, 205 6" />
-                    </svg>
-                    <span
-                      id="letter-email-error"
-                      className="sr-only"
-                      aria-live="polite"
-                    >
-                      {emailError ? "Add a valid email address." : ""}
-                    </span>
-                    <p
-                      className={`letter-spam-quip ${
-                        spamQuip ? "is-visible" : ""
-                      }`}
-                      aria-live="polite"
-                    >
-                      {spamQuip}
-                    </p>
+                    <div className="letter-paper-content">
+                      <h2 id="letter-title" className="letter-heading">
+                        Dear, Trung
+                      </h2>
+
+                      <label htmlFor="letter-message" className="sr-only">
+                        Your message to Trung
+                      </label>
+                      <textarea
+                        ref={textareaRef}
+                        id="letter-message"
+                        value={message}
+                        onChange={(event) => {
+                          setMessage(event.target.value)
+                        }}
+                        className="letter-message"
+                        placeholder="Write me a note..."
+                        rows={8}
+                        disabled={isSending}
+                      />
+
+                      <div
+                        ref={emailWrapRef}
+                        className={`t-input-wrap letter-signature ${
+                          emailError ? "is-error" : ""
+                        }`}
+                      >
+                        <label htmlFor="letter-email" className="letter-signoff">
+                          Sincerely,
+                        </label>
+                        <input
+                          ref={emailInputRef}
+                          id="letter-email"
+                          type="email"
+                          inputMode="email"
+                          autoComplete="email"
+                          value={email}
+                          onChange={(event) => {
+                            setEmail(event.target.value)
+                            setEmailError(false)
+                          }}
+                          className={`t-input letter-email-field ${
+                            emailError ? "is-error" : ""
+                          }`}
+                          placeholder="your@email.com"
+                          aria-invalid={emailError}
+                          aria-describedby="letter-email-error"
+                          disabled={isSending}
+                        />
+                        <svg
+                          className="t-error-msg letter-email-scribble"
+                          viewBox="0 0 210 16"
+                          preserveAspectRatio="none"
+                          aria-hidden="true"
+                        >
+                          <path d="M2 8 C 20 2, 31 14, 49 7 S 78 3, 95 9 S 124 13, 143 6 S 178 3, 208 9" />
+                          <path d="M5 11 C 29 5, 46 13, 67 8 S 105 4, 125 11 S 165 13, 205 6" />
+                        </svg>
+                        <span
+                          id="letter-email-error"
+                          className="sr-only"
+                          aria-live="polite"
+                        >
+                          {emailError ? "Add a valid email address." : ""}
+                        </span>
+                        <p
+                          className={`letter-spam-quip ${
+                            spamQuip ? "is-visible" : ""
+                          }`}
+                          aria-live="polite"
+                        >
+                          {spamQuip}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="letter-fold-crease" aria-hidden="true" />
                   </div>
                 </div>
 

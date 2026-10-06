@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises"
 import path from "node:path"
-import type { Study, StudyLibrary } from "./study"
+import type { ExplorationItem, Study, StudyLibrary } from "./study"
 
 /**
  * Filesystem access for the study content, kept apart from lib/study.ts
@@ -9,9 +9,21 @@ import type { Study, StudyLibrary } from "./study"
  */
 export const STUDIES_PATH = path.join(process.cwd(), "content", "studies.json")
 
-export async function getStudies(): Promise<Study[]> {
+export async function getStudyLibrary(): Promise<StudyLibrary> {
   const raw = await readFile(STUDIES_PATH, "utf8")
-  return (JSON.parse(raw) as StudyLibrary).studies
+  const library = JSON.parse(raw) as Partial<StudyLibrary>
+  return {
+    studies: library.studies ?? [],
+    exploration: library.exploration ?? [],
+  }
+}
+
+export async function getStudies(): Promise<Study[]> {
+  return (await getStudyLibrary()).studies
+}
+
+export async function getExploration(): Promise<ExplorationItem[]> {
+  return (await getStudyLibrary()).exploration
 }
 
 export async function getStudy(slug: string): Promise<Study | undefined> {

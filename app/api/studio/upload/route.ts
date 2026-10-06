@@ -3,21 +3,25 @@ import path from "node:path"
 import { NextResponse } from "next/server"
 
 /**
- * Writes an uploaded image into public/uploads and hands back its public
+ * Writes uploaded exploration/study media into public/uploads and hands back its public
  * path. Development only, for the same reason the save endpoint is: a
  * deployed build has a read-only filesystem, and an open upload endpoint
  * is an obvious way to get arbitrary files onto a host.
  */
 const UPLOADS_DIR = path.join(process.cwd(), "public", "uploads")
-const MAX_BYTES = 8 * 1024 * 1024
+const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+const MAX_VIDEO_BYTES = 40 * 1024 * 1024
 
-const EXTENSIONS: Record<string, string> = {
-  "image/png": "png",
-  "image/jpeg": "jpg",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/avif": "avif",
-  "image/svg+xml": "svg",
+const MEDIA_TYPES: Record<string, { extension: string; kind: "image" | "video" }> = {
+  "image/png": { extension: "png", kind: "image" },
+  "image/jpeg": { extension: "jpg", kind: "image" },
+  "image/webp": { extension: "webp", kind: "image" },
+  "image/gif": { extension: "gif", kind: "image" },
+  "image/avif": { extension: "avif", kind: "image" },
+  "image/svg+xml": { extension: "svg", kind: "image" },
+  "video/mp4": { extension: "mp4", kind: "video" },
+  "video/webm": { extension: "webm", kind: "video" },
+  "video/quicktime": { extension: "mov", kind: "video" },
 }
 
 export async function POST(request: Request) {
@@ -32,19 +36,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No file received." }, { status: 400 })
   }
 
-  const extension = EXTENSIONS[file.type]
+  const mediaType = MEDIA_TYPES[file.type]
   // Allowlist rather than trusting the filename — an arbitrary extension
   // is how you end up writing a .js into a served directory.
-  if (!extension) {
+  if (!mediaType) {
     return NextResponse.json(
       { error: `Unsupported file type: ${file.type || "unknown"}` },
       { status: 400 },
     )
   }
 
-  if (file.size > MAX_BYTES) {
+  const maxBytes =
+    mediaType.kind === "video" ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
+  if (file.size > maxBytes) {
     return NextResponse.json(
-      { error: `Too large — ${(file.size / 1e6).toFixed(1)}MB, limit is 8MB.` },
+      {
+        error: `Too large — ${(file.size / 1e6).toFixed(1)}MB, limit is ${
+          maxBytes / 1024 / 1024
+        }MB.`,
+      },
       { status: 400 },
     )
   }
@@ -56,7 +66,7 @@ export async function POST(request: Request) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 40)
 
-  const name = `${base || "image"}-${Date.now().toString(36)}.${extension}`
+  const name = `${base || mediaType.kind}-${Date.now().toString(36)}.${mediaType.extension}`
 
   await mkdir(UPLOADS_DIR, { recursive: true })
   await writeFile(
@@ -64,5 +74,5 @@ export async function POST(request: Request) {
     Buffer.from(await file.arrayBuffer()),
   )
 
-  return NextResponse.json({ src: `/uploads/${name}` })
+  return NextResponse.json({ src: `/uploads/${name}`, kind: mediaType.kind })
 }

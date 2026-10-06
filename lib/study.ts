@@ -42,11 +42,30 @@ export interface Study {
   /** Empty hides the badge. */
   status: string
   statusColor: string
+  /** Cover title; falls back to `product`. */
+  client?: string
+  /** Falls back to "Product Designer". */
+  role?: string
+  /** Shows the external-link button on the cover. */
+  url?: string
+  /** Opens `url` in an in-page iframe overlay instead of a new tab. */
+  embed?: boolean
   nodes: StudyNode[]
+}
+
+export interface ExplorationItem {
+  id: string
+  /** Optional label used by the CMS and overlay dialog. */
+  title: string
+  /** Public path or URL. Empty keeps the placeholder frame. */
+  src?: string
+  alt: string
+  kind: "image" | "video"
 }
 
 export interface StudyLibrary {
   studies: Study[]
+  exploration: ExplorationItem[]
 }
 
 export const DEFAULT_STATUS_COLOR = "#0072f5"
@@ -67,8 +86,11 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
     throw new Error("Content must be an object")
   }
 
-  const { studies } = value as Record<string, unknown>
+  const { studies, exploration = [] } = value as Record<string, unknown>
   if (!Array.isArray(studies)) throw new Error("`studies` must be an array")
+  if (!Array.isArray(exploration)) {
+    throw new Error("`exploration` must be an array")
+  }
 
   const seen = new Set<string>()
 
@@ -147,9 +169,43 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
       year: s.year,
       status: s.status,
       statusColor,
+      ...(typeof s.client === "string" && s.client ? { client: s.client } : {}),
+      ...(typeof s.role === "string" && s.role ? { role: s.role } : {}),
+      // Bare domains ("lookbook.dev") get https:// so the cover link still works.
+      ...(typeof s.url === "string" && s.url.trim()
+        ? { url: /^https?:\/\//.test(s.url.trim()) ? s.url.trim() : `https://${s.url.trim()}` }
+        : {}),
+      ...(s.embed === true ? { embed: true } : {}),
       nodes,
     } satisfies Study
   })
 
-  return { studies: parsed }
+  const explorationIds = new Set<string>()
+  const parsedExploration = exploration.map((entry, index) => {
+    if (typeof entry !== "object" || entry === null) {
+      throw new Error(`Exploration frame ${index} must be an object`)
+    }
+
+    const item = entry as Record<string, unknown>
+    if (typeof item.id !== "string" || item.id === "") {
+      throw new Error(`Exploration frame ${index} needs an id`)
+    }
+    if (explorationIds.has(item.id)) {
+      throw new Error(`Duplicate exploration id "${item.id}"`)
+    }
+    explorationIds.add(item.id)
+
+    const stringValue = (input: unknown) =>
+      typeof input === "string" ? input : ""
+
+    return {
+      id: item.id,
+      title: stringValue(item.title),
+      ...(stringValue(item.src) ? { src: stringValue(item.src) } : {}),
+      alt: stringValue(item.alt),
+      kind: item.kind === "video" ? "video" : "image",
+    } satisfies ExplorationItem
+  })
+
+  return { studies: parsed, exploration: parsedExploration }
 }
