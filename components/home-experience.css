@@ -82,10 +82,13 @@
 }
 
 @media (max-width: 760px) {
-  .home-hero { min-height: 100svh; justify-content: flex-start; gap: 26px; padding: calc(208px + env(safe-area-inset-top, 0px)) 16px calc(92px + env(safe-area-inset-bottom, 0px)); }
+  .home-page { height: 100vh; height: 100svh; overflow: hidden; }
+  .home-hero { height: 100%; min-height: 0; justify-content: flex-start; gap: 26px; padding: calc(208px + env(safe-area-inset-top, 0px)) 16px calc(92px + env(safe-area-inset-bottom, 0px)); }
   .home-soundboard-reveal { width: min(100%, max(280px, calc((100svh - 320px) * .81))); }
   .home-hero-copy { width: 100%; gap: 6px; font-size: clamp(17px, 4.3vw, 21px); line-height: 1.25; }
   .home-social-links { gap: clamp(9px, 3vw, 15px); font-size: 15px; }
+  /* Headline moves to the top-left, level with the nav, where it reads first. */
+  .home-hero-copy h1 { position: absolute; top: calc(18px + env(safe-area-inset-top, 0px)); left: calc(16px + env(safe-area-inset-left, 0px)); max-width: calc(100% - 140px); text-align: left; font-size: 22px; line-height: 1.25; }
   .home-secondary { min-height: calc(100dvh - 58px); padding-top: 64px; }
   .home-about { padding-top: min(68vh, 620px); }
 }

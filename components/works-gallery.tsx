@@ -120,9 +120,28 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
     let frame = 0
     row.style.transform = `translate3d(${base}px, 0, 0)`
 
+    // No hover on touch screens, so the caption follows whichever card is centered.
+    const touchOnly = window.matchMedia("(hover: none)").matches
+    let lastCheck = 0
+    let centered = -1
+    function captionCentered(now: number) {
+      if (now - lastCheck < 120) return
+      lastCheck = now
+      const middle = window.innerWidth / 2
+      let best = -1
+      let bestDistance = Infinity
+      elements.forEach((element, index) => {
+        const box = element.getBoundingClientRect()
+        const distance = Math.abs(box.left + box.width / 2 - middle)
+        if (distance < bestDistance) { bestDistance = distance; best = index }
+      })
+      if (best !== centered) { centered = best; changeCaption(cards[best]?.study ?? null) }
+    }
+
     function move(now: number) {
       const elapsed = Math.min(now - previous, 48)
       previous = now
+      if (touchOnly) captionCentered(now)
       if (!autoPaused.current && !reducedMotion) target -= cycle * elapsed / 38000
       while (target < base - cycle) { target += cycle; current += cycle }
       while (target > base) { target -= cycle; current -= cycle }
@@ -138,6 +157,45 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
       target -= delta * unit * .9
     }
 
+    // Drag (touch, pen or mouse): the row follows the finger 1:1, then flings with the release velocity.
+    let dragX: number | null = null
+    let dragId = -1
+    let velocity = 0
+    let lastMove = 0
+    let dragged = false
+    function onDown(event: globalThis.PointerEvent) {
+      if (event.pointerType === "mouse" && event.button !== 0) return
+      dragX = event.clientX
+      dragId = event.pointerId
+      velocity = 0
+      lastMove = event.timeStamp
+      dragged = false
+      autoPaused.current = true
+    }
+    function onDragMove(event: globalThis.PointerEvent) {
+      if (dragX === null || event.pointerId !== dragId) return
+      const dx = event.clientX - dragX
+      if (!dragged && Math.abs(dx) < 6) return
+      // Capture can throw if the pointer already ended (e.g. a cancelled touch); the drag still works without it.
+      if (!dragged) { dragged = true; try { surface!.setPointerCapture(dragId) } catch {} }
+      dragX = event.clientX
+      target += dx
+      current += dx
+      const dt = Math.max(1, event.timeStamp - lastMove)
+      velocity = velocity * .2 + (dx / dt) * .8
+      lastMove = event.timeStamp
+    }
+    function onUp(event: globalThis.PointerEvent) {
+      if (dragX === null || event.pointerId !== dragId) return
+      dragX = null
+      if (dragged && event.timeStamp - lastMove < 80) target += velocity * 280
+      if (event.pointerType !== "mouse") autoPaused.current = false
+    }
+    // A drag shouldn't also open the card it started on.
+    function onClick(event: MouseEvent) {
+      if (dragged) { event.preventDefault(); event.stopPropagation(); dragged = false }
+    }
+
     function onResize() {
       const newCycle = elements[center + sequence.length].offsetLeft - elements[center].offsetLeft
       cycle = newCycle
@@ -148,13 +206,25 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
     }
 
     surface.addEventListener("wheel", onWheel, { passive: false })
+    surface.addEventListener("pointerdown", onDown)
+    surface.addEventListener("pointermove", onDragMove)
+    surface.addEventListener("pointerup", onUp)
+    surface.addEventListener("pointercancel", onUp)
+    surface.addEventListener("click", onClick, true)
     window.addEventListener("resize", onResize)
     frame = requestAnimationFrame(move)
     return () => {
       cancelAnimationFrame(frame)
       surface.removeEventListener("wheel", onWheel)
+      surface.removeEventListener("pointerdown", onDown)
+      surface.removeEventListener("pointermove", onDragMove)
+      surface.removeEventListener("pointerup", onUp)
+      surface.removeEventListener("pointercancel", onUp)
+      surface.removeEventListener("click", onClick, true)
       window.removeEventListener("resize", onResize)
     }
+    // `cards` only changes when `sequence.length` does; re-running on every render would restart the row.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introReady, sequence.length])
 
   useEffect(() => () => {

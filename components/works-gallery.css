@@ -49,3 +49,6 @@
 }
 @media (hover: none) { .works-card { cursor: pointer; } .works-cursor { display: none; } }
 @media (prefers-reduced-motion: reduce) { .works-track { transform: translateX(calc(0px - var(--works-cycle) - var(--works-cycle) - var(--works-intro-shift))); } .works-page[data-intro-ready="false"] .works-card { opacity: 1; } .t-text-swap { transition: none !important; } .works-cursor { transition: none; } }
+
+.works-viewport { touch-action: pan-y; -webkit-user-select: none; user-select: none; }
+.works-card img { -webkit-user-drag: none; pointer-events: none; }
