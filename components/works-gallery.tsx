@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import type { PointerEvent } from "react"
@@ -335,13 +336,15 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
 
   return <div className="works-page" data-intro-ready={introReady} ref={page}>
     <PortfolioNav active="works" />
-    <main className="works-main">
+    <main id="main-content" tabIndex={-1} className="works-main">
+      <h1 className="sr-only">Selected work</h1>
       <div className="works-viewport" onPointerMove={moveCursor} onPointerLeave={() => { setHovered(null); changeCaption(null); setPointerHover(false); autoPaused.current = false }}>
-        <div className="works-track" ref={track}>
+        <div className="works-track" ref={track} aria-hidden="true">
           {cards.map(({ study, shape }, index) => <button
             className="works-card"
             data-shape={shape}
             type="button"
+            tabIndex={-1}
             key={`${study.slug}-${index}`}
             onPointerEnter={(event) => { if (event.pointerType === "mouse") { moveCursor(event); setHovered(study); changeCaption(study); setPointerHover(true); autoPaused.current = true } }}
             onFocus={() => { setHovered(study); changeCaption(study); autoPaused.current = true }}
@@ -353,6 +356,9 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
           </button>)}
         </div>
       </div>
+      <nav className="works-keyboard-links" aria-label="Selected projects">
+        {studies.map((study) => <Link key={study.slug} href={`/study/${study.slug}`}>View {study.product} project</Link>)}
+      </nav>
       <div className="works-caption" aria-live="polite"><div className={`t-text-swap ${captionPhase}`} data-visible={Boolean(captionStudy)} ref={caption}><span>{captionStudy?.product}</span><span>{captionStudy?.year}</span></div></div>
     </main>
     <span className="works-cursor" data-visible={Boolean(hovered) && pointerHover} ref={cursor} aria-hidden="true">View project</span>

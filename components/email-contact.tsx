@@ -26,7 +26,7 @@ export function EmailContact() {
     }
   }
 
-  return <main className="email-page">
+  return <main id="main-content" tabIndex={-1} className="email-page">
     <h1>Get in touch</h1>
     <form onSubmit={send}>
       <label>Subject<input value={subject} onChange={(event) => setSubject(event.target.value)} maxLength={120} required /></label>

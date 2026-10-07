@@ -14,13 +14,13 @@
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/b2b-msjnpbd0.png"
+          "src": "/uploads/zeme-muxbkz1l.jpg"
         },
         {
           "id": "n2",
           "type": "text",
           "title": "What's Zeme",
-          "copy": "Zeme is a real estate platform operating across both enterprise B2B and consumer B2C in New York City's rental market. I came on as the founding designer, meaning there was no prior design foundation. The product had no system, no visual language, no research process. I owned it all: product design, visual design, keynote decks, discovery, and the design system that made everything coherent.",
+          "copy": "Zeme serves New York City’s rental market through products for both renters and real estate teams. I joined as the founding designer with no existing design system or research process. I established the visual language, product flows, and reusable system while supporting discovery and client presentations.",
           "muted": false
         },
         {
@@ -34,7 +34,7 @@
           "id": "n4",
           "type": "text",
           "title": "Problem",
-          "copy": "A dual-sided real estate platform serving enterprise clients and everyday renters simultaneously is a rare design challenge. The B2B side demanded precision, credibility, and density — brokers and property managers needed powerful tools. The B2C side needed warmth, clarity, and trust — renters navigating NYC apartments are already overwhelmed. There was no existing design infrastructure to work from, and no dedicated research function. I had to build the foundation while shipping the product.",
+          "copy": "One platform had to serve two very different audiences. Brokers and property managers needed dense, precise tools; renters needed a clear, trustworthy path through a stressful search. With no design infrastructure in place, I had to define the foundation while shipping both experiences.",
           "muted": false
         },
         {
@@ -48,8 +48,8 @@
         {
           "id": "n6",
           "type": "text",
-          "title": "Ship faster with no data",
-          "copy": "We shipped the first redesign in 3 months with zero formal user research moving on instinct, client context, and real-time signals. It was a hard call, but the right one. Shipping gave us what upfront research couldn't: real behavior from real users. We saw where people dropped off, where the flow confused them, and where it broke from their mental models. Then we rebuilt the flows from scratch — this time with clients in the room, workshopping decisions instead of guessing.",
+          "title": "Ship, learn, rebuild",
+          "copy": "We launched the first redesign in three months using client context and the signals available to us. Shipping exposed where people dropped off and where the flow conflicted with their expectations. I then worked with clients to rethink those journeys and rebuild the flows around observed behavior.",
           "muted": false
         },
         {
@@ -63,7 +63,7 @@
           "id": "n11",
           "type": "text",
           "title": "Success",
-          "copy": "The redesign shipped and immediately moved the needle. 54% of customers onboarded without friction. The application process saw a +30% increase in completion. The platform now covers over $30M in rental estate for clients across New York City.",
+          "copy": "After the redesign, 54% of customers onboarded without friction and application completion rose 30%. The platform now supports more than $30M in rental estate across New York City.",
           "muted": false
         },
         {
@@ -76,7 +76,7 @@
         {
           "id": "n10",
           "type": "text",
-          "copy": "AI Interface by using Zeme's LLM",
+          "copy": "Exploring an AI interface powered by Zeme’s LLM.",
           "muted": true
         }
       ]
@@ -85,7 +85,7 @@
       "slug": "agentic",
       "product": "Zeme Agentic Search",
       "year": "2026",
-      "status": "Shipped",
+      "status": "Agentic search",
       "statusColor": "#0072f5",
       "client": "Zeme",
       "url": "https://zeme.io/",
@@ -95,13 +95,13 @@
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/agentic-msjrhwqi.png"
+          "src": "/uploads/agents-muxbn6ut.png"
         },
         {
           "id": "n3",
           "type": "text",
           "title": "Problem",
-          "copy": "Rental search is repetitive, fragmented, and highly time-sensitive. Renters often bounce between multiple platforms, recreate the same filters, compare dozens of listings, and continuously check for new inventory before good options disappear. Traditional search tools also struggle with how people actually make decisions. Renters think in preferences and tradeoffs, not rigid filters. Someone might want a quieter neighborhood but be willing to pay more for a shorter commute, or accept a smaller apartment if parking is included. That type of intent is difficult to express through checkboxes and dropdowns. The core problem wasn’t access to listings. It was the amount of manual effort required to continuously search, evaluate, and keep up with a changing rental market.",
+          "copy": "Rental search asks people to repeat the same work across platforms: set filters, compare listings, and check again before good options disappear. But renters think in tradeoffs, not checkboxes. A shorter commute may justify a higher rent; parking may matter more than square footage. Zeme needed to reduce that ongoing effort, not just return another list.",
           "muted": false
         },
         {
@@ -109,13 +109,13 @@
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/2-msl4ma06.png"
+          "src": "/uploads/frame-82-muxi66bw.jpg"
         },
         {
           "id": "n4",
           "type": "text",
           "title": "Solution",
-          "copy": "We kept the original Zeme website experience for users who preferred a traditional browsing interface, but redesigned the core product around a much simpler interaction through iMessage. Instead of configuring a long list of filters, renters could describe their needs conversationally in chat. A user could say, “Find me a one-bedroom under $3,000, pet-friendly, near downtown, with a reasonable commute.” Zeme interprets the request, searches across external rental sources, and surfaces relevant listings directly within the conversation. Users can continue refining their search naturally in the same thread, adjusting preferences like budget or amenities as their needs evolve. The focus shifted from redesigning the website into an agentic experience, to optimizing the AX/UX of the messaging flow where most users actually interact with Zeme, while still maintaining the website as an alternative entry point for those who prefer a more traditional search experience.",
+          "copy": "We kept the website for renters who prefer traditional browsing and made iMessage the main conversational flow. Renters can describe what they need in plain language, then refine budget, location, and amenities in the same thread. Zeme interprets each request, searches external rental sources, and returns relevant listings. The design work centered on making that exchange clear and useful.",
           "muted": false
         },
         {
@@ -123,13 +123,13 @@
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/3-msl4mclb.png"
+          "src": "/uploads/frame-83-muxi68xj.jpg"
         },
         {
           "id": "n5",
           "type": "text",
           "title": "A New Agentic Experience",
-          "copy": "The biggest change was moving Zeme from a search tool into an agent that could act on a renter’s behalf. Traditional rental products wait for users to return and perform another search. Zeme could instead continue working after the initial conversation. Once it understood a renter’s preferences, the agent could monitor new inventory, evaluate potential matches, and proactively send updates when something relevant appeared. This created a new interaction model: tell Zeme, Zeme searches, Zeme monitors, and Zeme updates you. Designing around agentic AI also meant thinking beyond individual screens. The product needed memory, context, proactive behavior, and the ability to adapt as a renter’s preferences changed over time.",
+          "copy": "Zeme could keep working after the first conversation. With a renter’s preferences in context, the agent could watch new inventory and send relevant updates without another manual search. I designed the experience around a simple loop: describe a need, review matches, refine preferences, and receive new options. The challenge was making memory and proactive behavior feel useful rather than intrusive.",
           "muted": false
         },
         {
@@ -137,13 +137,13 @@
           "type": "image",
           "wide": true,
           "columns": 1,
-          "src": "/uploads/4-msl4mf4o.png"
+          "src": "/uploads/frame-84-muxi6bbk.jpg"
         },
         {
           "id": "n6",
           "type": "text",
           "title": "Design Challenge",
-          "copy": "The pivot introduced a new challenge: how do you design rental search when the interface is no longer primarily a search interface? Traditional products make their logic visible through filters, maps, sorting controls, and listing cards. With an AI agent, much of that decision-making happens behind the scenes. As Founding Product Designer, I had to think about how Zeme should interpret ambiguous requests, communicate what it understood, ask useful follow-up questions, remember preferences, and proactively recommend listings without overwhelming users. Trust became just as important as usability. The agent needed to feel capable enough to search autonomously while still giving renters enough visibility and control to understand why certain listings were being recommended.",
+          "copy": "Filters and maps show how a traditional search works. An agent makes many decisions behind the scenes, so renters need to know what it understood and why a listing appeared. I designed for clarifying questions, editable preferences, and timely recommendations. The goal was to give the agent room to help while keeping renters informed and in control.",
           "muted": false
         }
       ]
@@ -155,7 +155,7 @@
       "status": "MCP",
       "statusColor": "#0072f5",
       "role": "Design Engineer",
-      "url": "https://trungvo.xzy",
+      "url": "https://github.com/trungvo-ux/lookbook",
       "nodes": [
         {
           "id": "n1",
@@ -163,6 +163,36 @@
           "wide": false,
           "columns": 1,
           "src": "/uploads/lookbook-muw9oph7.png"
+        },
+        {
+          "id": "n4",
+          "type": "text",
+          "title": "What's Lookbook?",
+          "copy": "Lookbook is a design-inspo MCP that searches curated galleries (Mobbin, Godly, Awwwards, and more) and returns ranked picks with screenshots in chat — so you can say “find me a fintech dashboard” and see real UI references without leaving Cursor.",
+          "muted": false
+        },
+        {
+          "id": "n2",
+          "type": "image",
+          "wide": false,
+          "columns": 1,
+          "src": "/uploads/search-muxdaeza.png"
+        },
+        {
+          "id": "n3",
+          "type": "text",
+          "title": "What's the tool?",
+          "copy": "Five tools agents call: list galleries, search across them, browse one source, open a page, or review a brief — each returning ranked design refs with screenshots in chat.",
+          "muted": false,
+          "action": {
+            "kind": "copy",
+            "label": "Copy MCP to AI Agent",
+            "value": "Connect Lookbook MCP at https://lookbook-mcp.onrender.com/mcp (remote HTTP — do not clone or self-host). Use it to search design inspo across galleries and always show returned screenshots inline in chat. Tools: list_sources, search_inspo, browse_source, get_inspo_page, review_brief.",
+            "backgroundColor": "#111111",
+            "textColor": "#ffffff",
+            "font": "inter",
+            "icon": "copy"
+          }
         }
       ]
     },
@@ -173,7 +203,7 @@
       "status": "watsonx.data",
       "statusColor": "#0072f5",
       "role": "Design Engineer",
-      "url": "https://IBM.com",
+      "url": "https://www.ibm.com/products/watsonx-data",
       "nodes": [
         {
           "id": "n1",
@@ -181,6 +211,36 @@
           "wide": false,
           "columns": 1,
           "src": "/uploads/ibmlogo-muw9ra5j.png"
+        },
+        {
+          "id": "n2",
+          "type": "text",
+          "title": "watsonx.data",
+          "copy": "At IBM, I worked as a Design Engineer on watsonx.data, an open, hybrid data foundation for analytics and AI.",
+          "muted": false
+        },
+        {
+          "id": "n3",
+          "type": "image",
+          "wide": false,
+          "columns": 1,
+          "src": "/uploads/gpu-acceleration-muxehcj8.jpg"
+        },
+        {
+          "id": "n4",
+          "type": "text",
+          "title": "GPU Acceleration Project",
+          "copy": "Query your Presto data with Nvidia's GPU",
+          "muted": false,
+          "action": {
+            "kind": "link",
+            "label": "Copy link",
+            "value": "https://www.ibm.com/new/announcements/technical-preview-of-gpu-acceleration-for-presto-c-in-watsonx-data",
+            "backgroundColor": "#111111",
+            "textColor": "#ffffff",
+            "font": "inter",
+            "icon": "external"
+          }
         }
       ]
     },
@@ -190,9 +250,9 @@
       "year": "2026",
       "status": "Computer",
       "statusColor": "#0072f5",
+      "role": "Design Engineer",
       "url": "https://trung-os-no-cover.vercel.app/",
       "embed": true,
-      "role": "Design Engineer",
       "nodes": [
         {
           "id": "n1",
@@ -200,6 +260,38 @@
           "wide": false,
           "columns": 1,
           "src": "/uploads/computer-muwa02e7.png"
+        }
+      ]
+    },
+    {
+      "slug": "hush",
+      "product": "Hush",
+      "year": "2026",
+      "status": "Personal project",
+      "statusColor": "#0072f5",
+      "role": "Designer & Developer",
+      "nodes": [
+        {
+          "id": "n1",
+          "type": "image",
+          "wide": false,
+          "columns": 1
+        },
+        {
+          "id": "n2",
+          "type": "text",
+          "title": "A quieter way to focus",
+          "copy": "Hush is a small macOS menu bar app for ambient sound. I designed and built a dial for play, pause, and volume, plus a rail that switches between rain, ocean, white noise, and fire. Sound changes crossfade so listening stays continuous. The interface scales from a visual prototype to a compact menu bar panel, and I packaged the app as a macOS DMG.",
+          "muted": false,
+          "action": {
+            "kind": "link",
+            "label": "Download Hush for Apple silicon",
+            "value": "https://github.com/trungvo-ux/hush/releases/download/v0.1.0/Hush_0.1.0_aarch64.dmg",
+            "backgroundColor": "#111111",
+            "textColor": "#ffffff",
+            "font": "inter",
+            "icon": "external"
+          }
         }
       ]
     }

@@ -26,7 +26,7 @@ export function HomeExperience() {
   return (
     <div className="home-page">
       <PortfolioNav active="home" />
-        <main className="home-hero">
+        <main id="main-content" tabIndex={-1} className="home-hero">
           <div className="home-soundboard-reveal t-panel-slide" data-open={shown} data-finished={boardRevealed}>
             <div className="home-soundboard-blueprint" aria-hidden="true">
               <div className="home-soundboard-blueprint-grid">

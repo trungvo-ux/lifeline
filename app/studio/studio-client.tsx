@@ -9,6 +9,7 @@ import {
   toSlug,
   type ExplorationItem,
   type Study,
+  type StudyAction,
   type StudyNode,
 } from "@/lib/study"
 
@@ -25,7 +26,7 @@ import {
  */
 
 const FIELD =
-  "w-full rounded-md border border-black/15 bg-white px-2 py-1.5 text-[13px] text-black outline-none focus:border-black/40 dark:border-white/15 dark:bg-zinc-950 dark:text-white dark:focus:border-white/40"
+  "w-full rounded-md border border-black/15 bg-white px-2 py-1.5 text-[13px] text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-white/15 dark:bg-zinc-950 dark:text-white"
 const BUTTON =
   "inline-flex items-center gap-1.5 rounded-md border border-black/15 px-2.5 py-1.5 text-[12px] transition-colors hover:bg-black/5 disabled:opacity-40 dark:border-white/15 dark:hover:bg-white/10"
 
@@ -75,6 +76,7 @@ function StackPreview({ study }: { study: Study }) {
                         {node.title ? <p className="truncate text-[7px] font-medium text-black dark:text-white">{node.title}</p> : null}
                         <div className="mt-[2px] h-[2px] w-full rounded-full bg-black/15 dark:bg-white/20" />
                         <div className="mt-[2px] h-[2px] w-2/3 rounded-full bg-black/15 dark:bg-white/20" />
+                        {node.action?.label ? <span className="mt-1 inline-block rounded-[2px] px-1 py-[2px] text-[6px]" style={{ backgroundColor: node.action.backgroundColor, color: node.action.textColor }}>{node.action.label}</span> : null}
                       </div>
                     ))}
                   </>
@@ -85,6 +87,11 @@ function StackPreview({ study }: { study: Study }) {
                     ))}
                   </dl>
                 )}
+                {!frame && study.metrics?.length ? <div className="mt-1 space-y-[2px]">
+                  {study.metrics.map((metric, metricIndex) => <div key={metricIndex} className="flex justify-between gap-1 rounded-[2px] bg-[#ececef] px-1 py-[2px] text-[6px] text-[#626168]">
+                    <span className="truncate">{metric.name}</span><strong className="truncate font-medium">{metric.kpi}</strong>
+                  </div>)}
+                </div> : null}
               </div>
               {showImage && image ? (
                 <div className="flex aspect-[4/3] w-[58%] shrink-0 gap-[2px] overflow-hidden rounded-[2px] bg-study-surface">
@@ -153,6 +160,7 @@ function ImageSlot({
 
       <div className="min-w-0 flex-1">
         <input
+          aria-label={`${label} URL`}
           className={FIELD}
           placeholder={`${label} — /uploads/… or a URL`}
           value={src ?? ""}
@@ -249,6 +257,7 @@ function ExplorationMediaSlot({
       <div className="min-w-0 flex-1 space-y-2">
         <div className="flex gap-2">
           <input
+            aria-label="Media URL"
             className={FIELD}
             placeholder="/uploads/… or a media URL"
             value={item.src ?? ""}
@@ -258,7 +267,7 @@ function ExplorationMediaSlot({
           />
           <select
             aria-label="Media type"
-            className="w-[92px] shrink-0 rounded-md border border-black/15 bg-white px-2 py-1.5 text-[13px] text-black outline-none focus:border-black/40 dark:border-white/15 dark:bg-zinc-950 dark:text-white dark:focus:border-white/40"
+            className={`${FIELD} !w-[92px] shrink-0`}
             value={item.kind}
             onChange={(event) =>
               onChange({ kind: event.target.value === "video" ? "video" : "image" })
@@ -397,12 +406,14 @@ function ExplorationEditor({
               />
               <div className="grid gap-2 sm:grid-cols-2">
                 <input
+                  aria-label={`Frame ${index + 1} title`}
                   className={FIELD}
                   placeholder="Title / overlay label"
                   value={item.title}
                   onChange={(event) => update(index, { title: event.target.value })}
                 />
                 <input
+                  aria-label={`Frame ${index + 1} alt text`}
                   className={FIELD}
                   placeholder="Alt text"
                   value={item.alt}
@@ -457,7 +468,7 @@ export default function Studio() {
 
   if (!studies || !exploration) {
     return (
-      <main className="mx-auto max-w-[1100px] px-6 py-16 text-[14px]">
+      <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1100px] px-6 py-16 text-[14px]">
         <p className="text-gray-600 dark:text-zinc-400">{status ?? "Loading…"}</p>
       </main>
     )
@@ -474,6 +485,9 @@ export default function Studio() {
         n.id === id ? ({ ...n, ...patch } as StudyNode) : n,
       ),
     })
+
+  const updateAction = (id: string, action: StudyAction, patch: Partial<StudyAction>) =>
+    updateNode(id, { action: { ...action, ...patch } })
 
   const move = (index: number, by: number) => {
     const next = [...study.nodes]
@@ -544,7 +558,7 @@ export default function Studio() {
   }
 
   return (
-    <main className="mx-auto max-w-[1100px] px-6 py-12 text-[14px]">
+    <main id="main-content" tabIndex={-1} className="mx-auto max-w-[1100px] px-6 py-12 text-[14px]">
       <header className="mb-6 flex items-start justify-between gap-6">
         <div>
           <h1 className="text-[20px] font-medium">Studio</h1>
@@ -578,6 +592,13 @@ export default function Studio() {
                 aria-controls={`studio-panel-${id}`}
                 tabIndex={selected ? 0 : -1}
                 onClick={() => setWorkspace(id)}
+                onKeyDown={(event) => {
+                  if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return
+                  event.preventDefault()
+                  const next = event.key === "ArrowLeft" || event.key === "Home" ? "case-studies" : "exploration"
+                  setWorkspace(next)
+                  document.getElementById(`studio-tab-${next}`)?.focus()
+                }}
                 className={`relative pb-3 text-[14px] font-medium transition-colors after:absolute after:inset-x-0 after:bottom-[-1px] after:h-px after:bg-current after:transition-transform ${
                   selected
                     ? "text-black after:scale-x-100 dark:text-white"
@@ -699,15 +720,16 @@ export default function Studio() {
                 onChange={(e) => updateStudy({ role: e.target.value })}
               />
             </label>
-            <label className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1">
               <span className="text-[12px] text-gray-600 dark:text-zinc-400">Website</span>
               <input
+                aria-label="Website URL"
                 className={FIELD}
                 placeholder="https://"
                 value={study.url ?? ""}
                 onChange={(e) => updateStudy({ url: e.target.value })}
               />
-              <span className="flex items-center gap-2 text-[12px]">
+              <label className="flex items-center gap-2 text-[12px]">
                 <input
                   type="checkbox"
                   className="h-3.5 w-3.5"
@@ -715,8 +737,35 @@ export default function Studio() {
                   onChange={(e) => updateStudy({ embed: e.target.checked })}
                 />
                 Open in overlay
-              </span>
-            </label>
+              </label>
+            </div>
+          </section>
+
+          <section className="mb-6 rounded-md border border-black/10 p-3 dark:border-white/10">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-[13px] font-medium">Cover metrics</h2>
+                <p className="text-[12px] text-gray-600 dark:text-zinc-400">Optional gray cards below the cover details.</p>
+              </div>
+              <button type="button" className={BUTTON} onClick={() => updateStudy({ metrics: [...(study.metrics ?? []), { name: "", kpi: "" }] })}>
+                <Plus className="h-3.5 w-3.5" /> Add metric
+              </button>
+            </div>
+            {study.metrics?.length ? <div className="space-y-2">
+              {study.metrics.map((metric, index) => <div className="grid grid-cols-[1fr_1fr_auto] items-end gap-2" key={index}>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[12px] text-gray-600 dark:text-zinc-400">Name</span>
+                  <input className={FIELD} placeholder="Metric name" value={metric.name} onChange={(event) => updateStudy({ metrics: study.metrics?.map((item, itemIndex) => itemIndex === index ? { ...item, name: event.target.value } : item) })} />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-[12px] text-gray-600 dark:text-zinc-400">KPI</span>
+                  <input className={FIELD} placeholder="e.g. 30%" value={metric.kpi} onChange={(event) => updateStudy({ metrics: study.metrics?.map((item, itemIndex) => itemIndex === index ? { ...item, kpi: event.target.value } : item) })} />
+                </label>
+                <button type="button" className={`${BUTTON} h-[31px]`} aria-label={`Remove metric ${index + 1}`} onClick={() => updateStudy({ metrics: study.metrics?.filter((_, itemIndex) => itemIndex !== index) })}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>)}
+            </div> : null}
           </section>
 
           <ol className="flex flex-col gap-3">
@@ -782,6 +831,7 @@ export default function Studio() {
                 {node.type === "text" ? (
                   <div className="flex flex-col gap-2">
                     <input
+                      aria-label={`Slide ${slide} title`}
                       className={FIELD}
                       placeholder="Title (hidden when the caption is gray)"
                       value={node.title ?? ""}
@@ -790,6 +840,7 @@ export default function Studio() {
                       }
                     />
                     <textarea
+                      aria-label={`Slide ${slide} copy`}
                       className={`${FIELD} min-h-[60px] resize-y`}
                       placeholder="Copywriting"
                       value={node.copy}
@@ -808,6 +859,46 @@ export default function Studio() {
                       />
                       Gray copywriting
                     </label>
+                    {node.action ? <div className="mt-2 grid gap-3 rounded-md border border-black/10 p-3 dark:border-white/10">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-[12px] font-medium">Button</span>
+                        <button type="button" className={BUTTON} onClick={() => updateNode(node.id, { action: undefined })}><Trash2 className="h-3.5 w-3.5" /> Remove</button>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <label className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Action</span>
+                          <select className={FIELD} value={node.action.kind} onChange={(event) => {
+                            const kind = event.target.value as StudyAction["kind"]
+                            updateAction(node.id, node.action!, { kind, icon: kind === "link" ? "external" : "copy" })
+                          }}>
+                            <option value="copy">Copy to clipboard</option><option value="link">Open page</option>
+                          </select>
+                        </label>
+                        <label className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Button text</span>
+                          <input className={FIELD} value={node.action.label} onChange={(event) => updateAction(node.id, node.action!, { label: event.target.value })} />
+                        </label>
+                      </div>
+                      <label className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">{node.action.kind === "copy" ? "Text or URL to copy (empty copies this page)" : "Page path or https:// URL"}</span>
+                        <input className={FIELD} placeholder={node.action.kind === "copy" ? "Current page URL" : "/study/another-project"} value={node.action.value} onChange={(event) => updateAction(node.id, node.action!, { value: event.target.value })} />
+                      </label>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Background color</span>
+                          <span className="flex gap-2"><input aria-label="Choose background color" type="color" className="h-[32px] w-[40px] cursor-pointer rounded border border-black/15" value={node.action.backgroundColor} onChange={(event) => updateAction(node.id, node.action!, { backgroundColor: event.target.value })} /><input aria-label="Background hex color" className={FIELD} value={node.action.backgroundColor} onChange={(event) => updateAction(node.id, node.action!, { backgroundColor: event.target.value })} /></span>
+                        </div>
+                        <div className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Text and icon color</span>
+                          <span className="flex gap-2"><input aria-label="Choose text and icon color" type="color" className="h-[32px] w-[40px] cursor-pointer rounded border border-black/15" value={node.action.textColor} onChange={(event) => updateAction(node.id, node.action!, { textColor: event.target.value })} /><input aria-label="Text and icon hex color" className={FIELD} value={node.action.textColor} onChange={(event) => updateAction(node.id, node.action!, { textColor: event.target.value })} /></span>
+                        </div>
+                        <label className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Font</span>
+                          <select className={FIELD} value={node.action.font} onChange={(event) => updateAction(node.id, node.action!, { font: event.target.value as StudyAction["font"] })}>
+                            <option value="inter">Inter</option><option value="mono">Mono</option><option value="serif">Serif</option>
+                          </select>
+                        </label>
+                        <label className="flex flex-col gap-1"><span className="text-[12px] text-gray-600 dark:text-zinc-400">Icon</span>
+                          <select className={FIELD} value={node.action.icon} onChange={(event) => updateAction(node.id, node.action!, { icon: event.target.value as StudyAction["icon"] })}>
+                            <option value="copy">Copy</option><option value="external">External link</option><option value="arrow">Arrow</option><option value="none">None</option>
+                          </select>
+                        </label>
+                      </div>
+                    </div> : <button type="button" className={`${BUTTON} mt-2 w-fit`} onClick={() => updateNode(node.id, { action: { kind: "copy", label: "Copy link", value: "", backgroundColor: "#111111", textColor: "#ffffff", font: "inter", icon: "copy" } satisfies StudyAction })}><Plus className="h-3.5 w-3.5" /> Add button</button>}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3">
@@ -841,6 +932,7 @@ export default function Studio() {
                     ) : null}
 
                     <input
+                      aria-label={`Slide ${slide} alt text`}
                       className={FIELD}
                       placeholder="Alt text"
                       value={node.alt ?? ""}

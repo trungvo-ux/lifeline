@@ -96,6 +96,8 @@ export function LifelineStage({
 }) {
   return (
     <main
+      id="main-content"
+      tabIndex={-1}
       className={cn(
         // Mobile lets the page itself scroll — the vertical timeline is a
         // long list, and boxing it into a viewport-height scroller left it

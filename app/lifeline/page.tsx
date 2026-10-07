@@ -11,6 +11,9 @@ import {
 } from "@/components/lifeline-shell"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { personalLifeline } from "@/lib/lifeline-personal"
+import type { Metadata } from "next"
+
+export const metadata: Metadata = { title: "Lifeline — Trung Vo" }
 
 /**
  * A complete Lifeline page.
@@ -29,6 +32,7 @@ export default function LifelinePage() {
       </LifelineNav>
 
       <LifelineStage>
+        <h1 className="sr-only">{personalLifeline.name} timeline</h1>
         <Lifeline
           markers={personalLifeline.markers}
           title={personalLifeline.name}

@@ -30,9 +30,26 @@ export interface StudyTextNode {
   copy: string
   /** The gray caption treatment — smaller, lighter, no title. */
   muted?: boolean
+  action?: StudyAction
+}
+
+export interface StudyAction {
+  kind: "copy" | "link"
+  label: string
+  /** Empty copies the current page URL for a copy action. */
+  value: string
+  backgroundColor: string
+  textColor: string
+  font: "inter" | "mono" | "serif"
+  icon: "copy" | "external" | "arrow" | "none"
 }
 
 export type StudyNode = StudyImageNode | StudyTextNode
+
+export interface StudyMetric {
+  name: string
+  kpi: string
+}
 
 export interface Study {
   /** The URL segment: /study/<slug>. */
@@ -50,6 +67,8 @@ export interface Study {
   url?: string
   /** Opens `url` in an in-page iframe overlay instead of a new tab. */
   embed?: boolean
+  /** Optional name and KPI cards below the cover details. */
+  metrics?: StudyMetric[]
   nodes: StudyNode[]
 }
 
@@ -116,6 +135,18 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
     if (typeof s.year !== "string") throw new Error(`${label}: bad year`)
     if (typeof s.status !== "string") throw new Error(`${label}: bad status`)
     if (!Array.isArray(s.nodes)) throw new Error(`${label}: bad nodes`)
+    if (s.metrics !== undefined && !Array.isArray(s.metrics)) throw new Error(`${label}: bad metrics`)
+
+    const metrics = (s.metrics as unknown[] | undefined)?.map((entry, metricIndex) => {
+      if (typeof entry !== "object" || entry === null) {
+        throw new Error(`${label}: metric ${metricIndex} must be an object`)
+      }
+      const metric = entry as Record<string, unknown>
+      if (typeof metric.name !== "string" || typeof metric.kpi !== "string") {
+        throw new Error(`${label}: metric ${metricIndex} needs a name and KPI`)
+      }
+      return { name: metric.name, kpi: metric.kpi } satisfies StudyMetric
+    })
 
     const statusColor =
       typeof s.statusColor === "string" && HEX.test(s.statusColor)
@@ -149,6 +180,32 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
         if (typeof n.copy !== "string") {
           throw new Error(`${label}: node ${nodeIndex} needs \`copy\``)
         }
+        let action: StudyAction | undefined
+        if (n.action !== undefined) {
+          if (typeof n.action !== "object" || n.action === null) {
+            throw new Error(`${label}: node ${nodeIndex} has a bad action`)
+          }
+          const a = n.action as Record<string, unknown>
+          if (a.kind !== "copy" && a.kind !== "link") {
+            throw new Error(`${label}: node ${nodeIndex} needs a copy or link action`)
+          }
+          if (typeof a.label !== "string" || typeof a.value !== "string") {
+            throw new Error(`${label}: node ${nodeIndex} action needs a label and value`)
+          }
+          const target = a.value.trim()
+          if (a.kind === "link" && target && !/^(https?:\/\/|\/(?!\/))/i.test(target)) {
+            throw new Error(`${label}: node ${nodeIndex} action link must be a page path or http(s) URL`)
+          }
+          action = {
+            kind: a.kind,
+            label: a.label,
+            value: a.value,
+            backgroundColor: typeof a.backgroundColor === "string" && HEX.test(a.backgroundColor) ? a.backgroundColor : "#111111",
+            textColor: typeof a.textColor === "string" && HEX.test(a.textColor) ? a.textColor : "#ffffff",
+            font: a.font === "mono" || a.font === "serif" ? a.font : "inter",
+            icon: a.icon === "external" || a.icon === "arrow" || a.icon === "none" ? a.icon : "copy",
+          }
+        }
         return {
           id: n.id,
           type: "text",
@@ -157,6 +214,7 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
             : {}),
           copy: n.copy,
           muted: Boolean(n.muted),
+          ...(action ? { action } : {}),
         } satisfies StudyTextNode
       }
 
@@ -176,6 +234,7 @@ export function parseStudyLibrary(value: unknown): StudyLibrary {
         ? { url: /^https?:\/\//.test(s.url.trim()) ? s.url.trim() : `https://${s.url.trim()}` }
         : {}),
       ...(s.embed === true ? { embed: true } : {}),
+      ...(metrics?.length ? { metrics } : {}),
       nodes,
     } satisfies Study
   })

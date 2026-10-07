@@ -122,7 +122,10 @@ export function Soundboard({ enabled = true }: { enabled?: boolean }) {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || (event.target instanceof HTMLElement && event.target.isContentEditable)) return
+      if (event.repeat || event.metaKey || event.ctrlKey || event.altKey) return
+      // Shortcuts belong to the page, not to a focused control. In particular,
+      // Space must keep its native behavior on buttons and switches.
+      if (event.target instanceof HTMLElement && event.target.closest("a, button, input, textarea, select, [contenteditable], [role='button'], [role='link'], [role='switch']")) return
       const index = keys.indexOf(event.key.toLowerCase())
       if (index < 0) return
       event.preventDefault()

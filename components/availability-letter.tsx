@@ -4,6 +4,7 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react"
 import "@/app/availability-letter.css"
 import { createPortal } from "react-dom"
 import { X } from "lucide-react"
+import { useDialogFocus } from "@/components/use-dialog-focus"
 
 const CLOSE_FALLBACK_MS = 150
 const SEND_FALLBACK_MS = 1_650
@@ -52,10 +53,12 @@ export function AvailabilityLetter() {
   const [isClosing, setIsClosing] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [message, setMessage] = useState("")
+  const [messageError, setMessageError] = useState(false)
   const [email, setEmail] = useState("")
   const [emailError, setEmailError] = useState(false)
   const [spamQuip, setSpamQuip] = useState("")
   const triggerRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const emailInputRef = useRef<HTMLInputElement>(null)
   const emailWrapRef = useRef<HTMLDivElement>(null)
@@ -76,6 +79,7 @@ export function AvailabilityLetter() {
     setIsMounted(true)
     setIsClosing(false)
     setIsSending(false)
+    setMessageError(false)
     setEmailError(false)
     setSpamQuip(getSpamQuip(getSessionSendCount()))
 
@@ -99,11 +103,18 @@ export function AvailabilityLetter() {
     }, closeMs)
   }, [clearTimer, isSending])
 
+  useDialogFocus(dialogRef, isMounted, closeLetter)
+
   async function sendLetter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     const letter = message.trim()
-    if (!letter || isSending || sendInFlightRef.current) return
+    if (isSending || sendInFlightRef.current) return
+    if (!letter) {
+      setMessageError(true)
+      textareaRef.current?.focus()
+      return
+    }
 
     const senderEmail = email.trim()
     const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)
@@ -228,16 +239,10 @@ export function AvailabilityLetter() {
     document.body.style.overflow = "hidden"
     textareaRef.current?.focus()
 
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeLetter()
-    }
-
-    document.addEventListener("keydown", onKeyDown)
     return () => {
-      document.removeEventListener("keydown", onKeyDown)
       document.body.style.overflow = previousOverflow
     }
-  }, [closeLetter, isMounted])
+  }, [isMounted])
 
   useEffect(
     () => () => {
@@ -287,6 +292,7 @@ export function AvailabilityLetter() {
             />
 
             <div
+              ref={dialogRef}
               className={`t-modal letter-dialog ${
                 isVisible ? "is-open" : ""
               } ${isClosing ? "is-closing" : ""}`}
@@ -331,12 +337,16 @@ export function AvailabilityLetter() {
                         value={message}
                         onChange={(event) => {
                           setMessage(event.target.value)
+                          setMessageError(false)
                         }}
+                        aria-invalid={messageError}
+                        aria-describedby={messageError ? "letter-message-error" : undefined}
                         className="letter-message"
                         placeholder="Write me a note..."
                         rows={8}
                         disabled={isSending}
                       />
+                      {messageError ? <span id="letter-message-error">Write a message before sending.</span> : null}
 
                       <div
                         ref={emailWrapRef}
@@ -401,7 +411,7 @@ export function AvailabilityLetter() {
                   className={`letter-send ${
                     message.trim() ? "is-ready" : ""
                   }`}
-                  disabled={!message.trim() || isSending}
+                  disabled={isSending}
                 >
                   {isSending ? "Sending…" : "Send letter"}
                 </button>

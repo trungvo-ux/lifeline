@@ -1,8 +1,11 @@
 import Link from "next/link"
+import type { Metadata } from "next"
 import { Lifeline, LifelineLegend } from "@/components/lifeline"
 import { DemoCompanyIcons } from "@/components/demo-company-icons"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { evilrabbitLifeline } from "@/lib/evilrabbit"
+
+export const metadata: Metadata = { title: "Lifeline embed demo — Trung Vo" }
 
 /**
  * The embedded case, deliberately without `LifelineShell` — that shell is
@@ -19,7 +22,7 @@ export default function EmbedDemo() {
     <div className="min-h-dvh bg-white text-black antialiased transition-colors duration-300 dark:bg-black dark:text-white">
       <DemoCompanyIcons />
 
-      <main className="mx-auto w-full max-w-5xl px-6 py-24">
+      <main id="main-content" tabIndex={-1} className="mx-auto w-full max-w-5xl px-6 py-24">
         <header className="flex items-center justify-between">
           <Link
             href="/"

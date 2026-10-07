@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Kalam } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { ClickSound } from "@/components/click-sound";
@@ -14,6 +14,9 @@ const kalam = Kalam({
   subsets: ["latin"],
   weight: "400",
 });
+
+// viewport-fit=cover makes env(safe-area-inset-*) real, so fixed controls clear the notch and home bar.
+export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover", themeColor: "#ffffff" }
 
 export const metadata: Metadata = {
   title: "Trung Vo's Portfolio",
@@ -34,6 +37,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" disableTransitionOnChange>
+          <a className="skip-link" href="#main-content">Skip to content</a>
           <ClickSound />
           {children}
         </ThemeProvider>

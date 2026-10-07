@@ -393,12 +393,21 @@ export function LifelineEventMedia({
   media: LifelineEventImage
   className?: string
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  useEffect(() => {
+    const video = videoRef.current
+    if (video && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      video.play().catch(() => {})
+    }
+  }, [media.video])
+
   if (media.video) {
     return (
       <video
+        ref={videoRef}
         src={media.video}
         poster={media.src}
-        autoPlay
+        controls
         muted
         loop
         playsInline

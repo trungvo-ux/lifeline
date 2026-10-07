@@ -11,6 +11,7 @@ import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import type { ExplorationItem } from "@/lib/study"
 import { cn } from "@/lib/utils"
+import { useDialogFocus } from "@/components/use-dialog-focus"
 
 interface FrameRect {
   left: number
@@ -58,9 +59,11 @@ function getCssDuration(name: string, fallback: number) {
 function ExplorationMedia({
   item,
   overlay = false,
+  reducedMotion = false,
 }: {
   item: ExplorationItem
   overlay?: boolean
+  reducedMotion?: boolean
 }) {
   if (!item.src) return null
 
@@ -70,7 +73,7 @@ function ExplorationMedia({
         src={item.src}
         muted={!overlay}
         controls={overlay}
-        autoPlay={overlay}
+        autoPlay={overlay && !reducedMotion}
         loop={!overlay}
         playsInline
         preload={overlay ? "auto" : "metadata"}
@@ -157,24 +160,19 @@ function ExplorationOverlay({
     closeTimerRef.current = window.setTimeout(onClosed, closeMs + 80)
   }, [getHome, onClosed, reducedMotion, start])
 
+  useDialogFocus(rootRef, true, dismiss)
+
   useEffect(() => {
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
-    rootRef.current?.focus({ preventScroll: true })
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") dismiss()
-    }
-    window.addEventListener("keydown", onKeyDown)
 
     return () => {
       document.body.style.overflow = previousOverflow
-      window.removeEventListener("keydown", onKeyDown)
       if (closeTimerRef.current !== null) {
         window.clearTimeout(closeTimerRef.current)
       }
     }
-  }, [dismiss])
+  }, [])
 
   return createPortal(
     <div
@@ -193,6 +191,7 @@ function ExplorationOverlay({
       <button
         type="button"
         aria-label="Close exploration media"
+        tabIndex={-1}
         className="exploration-overlay-backdrop absolute inset-0 cursor-zoom-out bg-black/80"
         onClick={dismiss}
       />
@@ -219,7 +218,7 @@ function ExplorationOverlay({
             closing && "is-closing",
           )}
         >
-          <ExplorationMedia item={item} overlay />
+          <ExplorationMedia item={item} overlay reducedMotion={reducedMotion} />
         </div>
       </figure>
 

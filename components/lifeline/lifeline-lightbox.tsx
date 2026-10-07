@@ -8,7 +8,9 @@ import {
   useState,
 } from "react"
 import { createPortal } from "react-dom"
+import { X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useDialogFocus } from "@/components/use-dialog-focus"
 import type { LifelinePhoto } from "./types"
 
 const OPEN_MS = 520
@@ -101,10 +103,12 @@ function LightboxMedia({
       src={photo.video}
       poster={photo.src}
       muted
+      controls
       loop
       playsInline
       preload="auto"
       aria-label={photo.alt}
+      onClick={(event) => event.stopPropagation()}
       className="block h-full w-full object-cover"
     />
   )
@@ -146,9 +150,8 @@ export function LifelineLightbox({
   framed?: boolean
   onClosed: () => void
 }) {
-  const target = useRef<Target | null>(null)
-  if (target.current === null) target.current = computeTarget(start)
-  const { left, top, width, height } = target.current
+  const [target] = useState(() => computeTarget(start))
+  const { left, top, width, height } = target
   // The clone itself is full-size and FLIP-scales down over the source.
   // Scale its paper margins up by the inverse amount so their *visible*
   // size at the first/last frame exactly matches the 12px/48px source
@@ -165,10 +168,10 @@ export function LifelineLightbox({
 
   const figureRef = useRef<HTMLElement>(null)
 
-  const reduceMotion = useRef(
+  const [reduceMotion] = useState(() =>
     typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  ).current
+  )
 
   // Center-anchored FLIP: rotation and scale about the center match
   // how the card itself is transformed, so the first frame is
@@ -225,7 +228,6 @@ export function LifelineLightbox({
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
-    root.focus({ preventScroll: true })
     const block = (event: TouchEvent) => event.preventDefault()
     root.addEventListener("touchmove", block, { passive: false })
     return () => root.removeEventListener("touchmove", block)
@@ -264,13 +266,7 @@ export function LifelineLightbox({
     window.setTimeout(onClosed, OPEN_MS + 120)
   }, [reduceMotion, onClosed, toTransform, getHome, start])
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") dismiss()
-    }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
-  }, [dismiss])
+  useDialogFocus(rootRef, true, dismiss)
 
   return createPortal(
     <div
@@ -278,7 +274,7 @@ export function LifelineLightbox({
       className="fixed inset-0 z-[999] touch-none overscroll-contain"
       role="dialog"
       aria-modal="true"
-      aria-label={photo.alt}
+      aria-label={photo.alt || "Photo viewer"}
       tabIndex={-1}
       // The portal lives under <body>, but React events still bubble up
       // the component tree — without this, a backdrop press would reach
@@ -288,6 +284,14 @@ export function LifelineLightbox({
       onPointerUp={(event) => event.stopPropagation()}
       onClick={(event) => event.stopPropagation()}
     >
+      <button
+        type="button"
+        aria-label="Close photo"
+        onClick={dismiss}
+        className="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-white text-black shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+      >
+        <X className="h-5 w-5" aria-hidden="true" />
+      </button>
       <div
         className={cn(
           "absolute inset-0 cursor-zoom-out bg-black/70 transition-opacity",
@@ -333,7 +337,7 @@ export function LifelineLightbox({
         <div className={cn(framed && "h-full w-full overflow-hidden")}>
           <LightboxMedia
             photo={photo}
-            playing={settled}
+            playing={settled && !reduceMotion}
             mediaTime={start.mediaTime}
           />
         </div>
