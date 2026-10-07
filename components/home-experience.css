@@ -92,3 +92,5 @@
   .home-secondary { min-height: calc(100dvh - 58px); padding-top: 64px; }
   .home-about { padding-top: min(68vh, 620px); }
 }
+/* The inline IBM link is only ~26px tall; pad its hit area to 44px without moving the text. */
+.home-hero-copy h1 a { display: inline-block; padding-block: 9px; margin-block: -9px; }
