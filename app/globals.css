@@ -255,13 +255,21 @@
     opacity var(--tt-out-dur) var(--tt-out-ease),
     transform var(--tt-out-dur) var(--tt-out-ease);
 }
-.t-tt-wrap:hover .t-tt,
 .t-tt-trigger:focus-visible + .t-tt {
   opacity: 1;
   transform: translate(-50%, 0) scale(1);
   transition-duration: var(--tt-in-dur);
   transition-timing-function: var(--tt-in-ease);
   transition-delay: var(--tt-delay);
+}
+@media (hover: hover) and (pointer: fine) {
+  .t-tt-wrap:hover .t-tt {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+  transition-duration: var(--tt-in-dur);
+  transition-timing-function: var(--tt-in-ease);
+  transition-delay: var(--tt-delay);
+}
 }
 
 .exploration-nav {
@@ -407,12 +415,14 @@
   content: "";
 }
 
+@media (hover: hover) and (pointer: fine) {
 .availability-trigger:hover {
   filter: brightness(0.985);
   box-shadow:
     0 0 0 1px rgb(0 0 0 / 0.13),
     0 2px 4px -1px rgb(0 0 0 / 0.1),
     0 5px 12px rgb(0 0 0 / 0.08);
+}
 }
 
 .availability-trigger:focus-visible {
@@ -433,10 +443,12 @@
     box-shadow 240ms ease-in-out;
 }
 
+@media (hover: hover) and (pointer: fine) {
 .availability-trigger:hover .availability-dot {
   transform: scale(1.08);
   opacity: 0.88;
   box-shadow: 0 0 0 3px rgb(34 197 94 / 0.1);
+}
 }
 
 .dark .availability-trigger {
@@ -451,12 +463,14 @@
     0 2px 8px oklch(0 0 0 / 0.24);
 }
 
+@media (hover: hover) and (pointer: fine) {
 .dark .availability-trigger:hover {
   filter: brightness(1.08);
   box-shadow:
     0 0 0 1px oklch(1 0 0 / 0.22),
     0 2px 4px -1px oklch(0 0 0 / 0.44),
     0 6px 16px oklch(0 0 0 / 0.3);
+}
 }
 
 .letter-overlay {
@@ -758,11 +772,13 @@
   transform: translate(-50%, 0) scale(1);
 }
 
+@media (hover: hover) and (pointer: fine) {
 .letter-send:hover:not(:disabled) {
   background: #090908;
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.18),
     0 7px 16px rgb(0 0 0 / 0.14);
+}
 }
 
 .letter-send:focus-visible,
@@ -802,9 +818,11 @@
   line-height: 1;
 }
 
+@media (hover: hover) and (pointer: fine) {
 .letter-close:hover:not(:disabled) {
   background: rgb(255 255 255 / 0.12);
   color: #fff;
+}
 }
 
 .letter-plane-model {
