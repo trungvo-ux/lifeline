@@ -98,6 +98,8 @@ export function StudyStory({ study }: { study: Study }) {
   const [expanded, setExpanded] = useState(false)
   const [embedState, setEmbedState] = useState<"idle" | "loading" | "ready">("idle")
   const [activeStep, setActiveStep] = useState(0)
+  // Phones: which card is flipped to show its story.
+  const [openCard, setOpenCard] = useState<string | null>(null)
   const [loaded, setLoaded] = useState(false)
   const productName = study.client || study.product
   const projectName = study.status
@@ -116,6 +118,9 @@ export function StudyStory({ study }: { study: Study }) {
       </div>)}
     </div> : null}
   </div>
+
+  // Tapping the cover thumbnail scrolls to the first story slide (its copy).
+  const openStory = () => scrollTo({ top: innerHeight * STEP, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" })
 
   useEffect(() => {
     const timer = window.setTimeout(() => setLoaded(true), 80)
@@ -151,7 +156,7 @@ export function StudyStory({ study }: { study: Study }) {
         <div className="study-step-left">
           {coverInfo()}
         </div>
-        <div className="study-step-right"><div className="study-visual" data-study-cover-image>{frames[0] ? <Photo image={frames[0].image} priority /> : null}</div></div>
+        <div className="study-step-right"><div className="study-visual" data-study-cover-image role={slides.length ? "button" : undefined} tabIndex={slides.length ? 0 : undefined} aria-label={slides.length ? `Read the ${productName} story` : undefined} onClick={slides.length ? openStory : undefined} onKeyDown={slides.length ? (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openStory() } } : undefined}>{frames[0] ? <Photo image={frames[0].image} priority /> : null}</div></div>
       </section>
       {slides.map((frame, index) => <section className={`study-step study-step--detail${index === 0 ? " study-step--first-detail" : ""}`} style={{ zIndex: index + 1 }} data-active={activeStep === index + 1} data-past={activeStep > index + 1} aria-hidden={activeStep !== index + 1} inert={activeStep !== index + 1} key={frame.id}>
         <div className="study-step-left">
@@ -168,6 +173,45 @@ export function StudyStory({ study }: { study: Study }) {
           <div className="study-visual"><Photo image={frame.image} /></div>
         </div> : null}
       </section>)}
+    </div>
+    {/* Phones (≤760px): one free-scrolling page of cards, like gabrielbeaugonin.com/project/lightship.
+        Tapping a card shows the story behind it; back and link stay pinned at the bottom. */}
+    <div className="study-cards">
+      <div className="study-cards-head">
+        <dl>
+          <div><dt>{productName}</dt><dd>{projectName}</dd></div>
+          <div><dt>Role</dt><dd>{study.role || "Product Designer"}</dd></div>
+          <div><dd>{study.year}</dd></div>
+        </dl>
+      </div>
+      {frames.map((frame, index) => {
+        const open = openCard === frame.id
+        const hasStory = frame.copy.length > 0
+        const title = frame.copy.find((node) => node.title)?.title || "The story"
+        // A card with copy swaps to its story; the "Read more" pill on the front says there's more behind it.
+        return <section className="study-card" data-open={open} data-flippable={hasStory} style={{ "--card-index": index } as React.CSSProperties} key={frame.id}>
+          <div className="study-card-inner">
+            <button type="button" className="study-card-face" disabled={!hasStory} aria-hidden={open} inert={open} aria-label={hasStory ? `Read more: ${title}` : undefined} onClick={() => setOpenCard(frame.id)}>
+              <div className="study-visual" data-study-cover-image={index === 0 ? true : undefined}><Photo image={frame.image} priority={index === 0} /></div>
+              {hasStory ? <span className="study-card-pill" aria-hidden="true">Read more</span> : null}
+            </button>
+            {hasStory ? <div className="study-card-back" aria-hidden={!open} inert={!open}>
+              <div className="study-card-back-copy">
+                {frame.copy.map((node) => <div className="study-copy-block" key={node.id}>
+                  {node.title ? <h2>{node.title}</h2> : null}
+                  <p>{node.copy}</p>
+                  {node.action ? <DetailAction action={node.action} /> : null}
+                </div>)}
+              </div>
+              <button type="button" className="study-card-pill study-card-pill--close" aria-label={`Close: ${title}`} onClick={() => setOpenCard(null)}>Close</button>
+            </div> : null}
+          </div>
+        </section>
+      })}
+      <nav className="study-cards-actions" aria-label="Case study">
+        <Link href="/works" aria-label="Back to works"><ArrowLeft size={24} strokeWidth={1.75} aria-hidden="true" /></Link>
+        {study.url ? <a href={study.url} target="_blank" rel="noopener noreferrer" aria-label={`Visit ${productName} website`} onClick={study.embed ? (event) => { event.preventDefault(); setEmbedState("loading"); overlay.current?.showModal() } : undefined}><ExternalLink size={24} strokeWidth={1.75} aria-hidden="true" /></a> : null}
+      </nav>
     </div>
     <div className="study-scroll-steps" aria-hidden="true">
       {Array.from({ length: slides.length + 1 }, (_, index) => <div id={`study-step-${index}`} className="study-scroll-step" key={index} />)}

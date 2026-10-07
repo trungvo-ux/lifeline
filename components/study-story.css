@@ -67,9 +67,11 @@ html:has(.study-story)::-webkit-scrollbar { display: none; }
   .study-back { top: 24px; right: auto; left: 24px; }
   .study-step { display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; gap: 12px; padding: 24px; }
   .study-step-left { flex: 1 1 auto; width: 100%; min-height: 0; }
-  .study-step-right { flex: none; width: min(100%, calc(100dvh - 330px)); align-self: center; }
+  .study-step-right { flex: none; width: min(100%, calc(100dvh - 400px)); align-self: center; }
   .study-step--cover .study-step-left, .study-step--detail .study-step-left { display: block; height: auto; }
-  .study-step--cover .study-cover-info { width: 100%; gap: 16px; margin-top: max(0px, calc(100dvh - 727px)); text-align: left; }
+  /* Cover text sits at the bottom of its area, right above the image, at any width; the top padding clears the back button. */
+  .study-step--cover .study-step-left { display: flex; flex-direction: column; justify-content: flex-end; padding-top: 48px; }
+  .study-step--cover .study-cover-info { width: 100%; gap: 16px; text-align: left; }
   .study-cover-external { position: static; margin-top: 12px; border-radius: 12px; }
   .study-cover-metrics, .study-cover-info:has(.study-cover-external) .study-cover-metrics { position: static; margin-top: 4px; }
   .study-cover-metric { min-height: 96px; padding: 16px; border-radius: 12px; }
@@ -88,7 +90,7 @@ html:has(.study-story)::-webkit-scrollbar { display: none; }
 @media (max-width: 1100px) and (max-height: 760px) {
   .study-step { padding: 16px 24px; }
   .study-back { top: 16px; }
-  .study-step--cover .study-cover-info { gap: 8px; margin-top: 70px; }
+  .study-step--cover .study-cover-info { gap: 8px; }
   .study-cover-info dl { gap: 8px; font-size: 18px; }
   .study-step-right { width: min(100%, calc(100dvh - 330px)); }
   .study-copy-block { font-size: 16px; }
@@ -164,3 +166,65 @@ html:has(.study-story)::-webkit-scrollbar { display: none; }
   .study-detail-action-desktop { display: none; }
   .study-detail-action-unavailable { display: inline-flex; }
 }
+
+/* Phone cover per Figma 219:1145: 24px info stack and a 60px link button above the image. Tapping the image opens the story. */
+@media (max-width: 760px) {
+  .study-step--cover .study-visual { cursor: pointer; transition: transform 100ms ease-out; -webkit-tap-highlight-color: transparent; }
+  .study-step--cover .study-visual:active { transform: scale(.98); }
+  .study-cover-info dl { font-size: 24px; line-height: normal; }
+  .study-cover-external { width: 60px; height: 60px; margin-top: 8px; border-radius: 20px; }
+}
+
+/* Phone case study: free-scrolling cards (inspired by gabrielbeaugonin.com/project/lightship). */
+.study-cards { display: none; }
+@media (max-width: 1100px) {
+  html:has(.study-story) { scroll-behavior: smooth; }
+  .study-stage, .study-scroll-steps, .study-back { display: none; }
+  .study-cards { display: flex; flex-direction: column; gap: 16px; width: min(100%, 640px); margin-inline: auto; padding: calc(24px + env(safe-area-inset-top, 0px)) 24px calc(112px + env(safe-area-inset-bottom, 0px)); line-height: normal; }
+  .study-cards-head { padding: 8px 0 16px; }
+  .study-cards-head dl { display: grid; gap: 16px; margin: 0; font-size: 24px; font-weight: 500; }
+  .study-cards-head dl > div { display: grid; gap: 4px; }
+  .study-cards-head dd { margin: 0; color: #949494; }
+  /* Front is the image + "Read more" pill; the story fades in over it on tap (no flip). */
+  .study-card { position: relative; z-index: calc(100 - var(--card-index, 0)); }
+  .study-card-inner { position: relative; }
+  .study-card-face, .study-card-back { border-radius: 24px; }
+  .study-card-face { position: relative; display: block; width: 100%; padding: 0; border: 0; background: none; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 100ms ease-out; }
+  .study-card-face:disabled { cursor: default; }
+  .study-card-face:active:not(:disabled) { transform: scale(.98); }
+  .study-card-face:focus-visible { outline: 2px solid #286995; outline-offset: 2px; }
+  .study-card .study-visual { aspect-ratio: 1; border-radius: 24px; }
+  .study-card-back { position: absolute; inset: 0; display: flex; flex-direction: column; overflow: hidden; background: #f4f4f5; opacity: 0; visibility: hidden; transition: opacity 200ms ease-out, visibility 0s linear 200ms; }
+  .study-card[data-open="true"] .study-card-back { opacity: 1; visibility: visible; transition: opacity 200ms ease-out, visibility 0s; }
+  .study-card-back-copy { flex: 1; display: grid; align-content: start; gap: 16px; overflow-y: auto; overscroll-behavior: contain; padding: 24px 24px 8px; font-weight: 500; }
+  .study-card-back .study-copy-block { gap: 6px; font-size: 16px; line-height: 1.35; }
+  .study-card-back h2 { color: #111; }
+  .study-card-back p { color: #626168; }
+  .study-card-pill { position: absolute; left: 12px; bottom: 12px; display: inline-flex; min-height: 44px; align-items: center; padding: 0 16px; border: 0; border-radius: 22px; background: rgb(255 255 255 / .92); color: #111; font: 500 15px/1 Inter, Arial, sans-serif; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+  .study-card-pill--close { position: static; align-self: flex-start; margin: 8px 12px 12px; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; transition: transform 100ms ease-out; }
+  .study-card-pill--close:active { transform: scale(.96); }
+  .study-card-pill--close:focus-visible { outline: 2px solid #286995; outline-offset: 2px; }
+  .study-cards-actions { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: max(24px, calc(50% - 296px)); z-index: 200; display: flex; gap: 10px; }
+  .study-cards-actions a { display: grid; width: 56px; height: 56px; place-items: center; border-radius: 18px; background: #fff; color: #111; text-decoration: none; box-shadow: 0 0 0 1px rgb(0 0 0 / .06), 0 4px 16px rgb(0 0 0 / .12); touch-action: manipulation; -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none; transition: transform 100ms ease-out; }
+  .study-cards-actions a:active { transform: scale(.96); }
+  .study-cards-actions a:focus-visible { outline: 2px solid #286995; outline-offset: 3px; }
+}
+@media (max-width: 1100px) and (prefers-reduced-motion: reduce) {
+  html:has(.study-story) { scroll-behavior: auto; }
+  .study-card-back, .study-card-face, .study-card-pill--close, .study-cards-actions a { transition: none !important; }
+}
+
+/* Phone entrance: the header and the other cards pop in around the cover card.
+   Arriving from Works (html[data-study-entry]) waits for the flying thumbnail to land first. */
+@media (max-width: 1100px) and (prefers-reduced-motion: no-preference) {
+  .study-cards { --entry-delay: 80ms; }
+  html[data-study-entry] .study-cards { --entry-delay: 520ms; }
+  .study-cards-head, .study-cards-actions { animation: study-card-pop 520ms cubic-bezier(.22, 1, .36, 1) both; }
+  .study-cards-head { animation-delay: var(--entry-delay); }
+  /* Same arrival as the Works carousel intro (works-gallery.tsx), turned vertical:
+     each card slides out from under the one above it, 175ms apart, 460ms each. */
+  .study-card:not(:first-of-type) { animation: study-card-arrive 460ms cubic-bezier(.22, 1, .36, 1) both; animation-delay: calc(var(--entry-delay) + (var(--card-index) - 1) * 175ms); }
+  .study-cards-actions { animation-delay: calc(var(--entry-delay) + 140ms); }
+}
+@keyframes study-card-arrive { from { opacity: 0; transform: translateY(-42px) scale(.92); } to { opacity: 1; transform: none; } }
+@keyframes study-card-pop { from { opacity: 0; transform: translateY(24px) scale(.96); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }

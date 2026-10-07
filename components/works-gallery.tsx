@@ -304,6 +304,8 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
       objectFit: "cover", borderRadius: "32px", zIndex: "1000", pointerEvents: "none",
     })
     document.body.appendChild(overlay)
+    // Lets the case study hold its header and other cards until the thumbnail has landed.
+    document.documentElement.dataset.studyEntry = "fly"
     setHovered(null)
     router.push(url)
 
@@ -313,9 +315,12 @@ export function WorksGallery({ studies }: { studies: Study[] }) {
       finished = true
       observer.disconnect()
       overlay.remove()
+      // Cleared after the entrance has played, so changing the delay never restarts it mid-way.
+      window.setTimeout(() => { delete document.documentElement.dataset.studyEntry }, 1500)
     }
     const observer = new MutationObserver(() => {
-      const target = document.querySelector<HTMLElement>("[data-study-cover-image]")
+      // Desktop and phone layouts each render a cover; fly to whichever one is actually laid out.
+      const target = [...document.querySelectorAll<HTMLElement>("[data-study-cover-image]")].find((element) => element.getClientRects().length > 0)
       if (!target) return
       observer.disconnect()
       const to = target.getBoundingClientRect()
